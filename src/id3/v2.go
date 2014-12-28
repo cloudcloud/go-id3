@@ -95,6 +95,8 @@ func (f *frame) Explain() string {
 		return "Private Frame"
 	case "TALB":
 		return "Album Name"
+	case "TBPM":
+		return "Beats Per Minute"
 	case "TCOM":
 		return "Composer"
 	case "TCON":
@@ -105,12 +107,26 @@ func (f *frame) Explain() string {
 		return "Date"
 	case "TENC":
 		return "Encoded by"
+	case "TEXT":
+		return "Lyricist"
+	case "TFLT":
+		return "File Type"
+	case "TIME":
+		return "Time"
 	case "TIT2":
 		return "Title"
 	case "TLAN":
 		return "Language"
+	case "TLEN":
+		return "Length"
+	case "TOAL":
+		return "Original Album"
+	case "TOLY":
+		return "Original Lyricist"
 	case "TOPE":
 		return "Original Artist"
+	case "TORY":
+		return "Original Release Year"
 	case "TPE1":
 		return "Lead Performer"
 	case "TPUB":
