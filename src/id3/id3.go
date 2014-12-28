@@ -2,6 +2,7 @@ package id3
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 var (
 	content []byte
+	dbg     bool
 )
 
 type Id3 struct {
@@ -20,6 +22,8 @@ type Id3 struct {
 }
 
 func New(f string) *Id3 {
+	dbg = false
+
 	i := new(Id3)
 	i.Filename = f
 
@@ -34,6 +38,10 @@ func (i *Id3) Process() *Id3 {
 	i.Id3V2.Parse(i.Filename)
 
 	return i
+}
+
+func (i *Id3) SetDebug() {
+	dbg = true
 }
 
 func (i *Id3) PrettyPrint() {
@@ -86,6 +94,12 @@ func getString(buf []byte) string {
 	}
 
 	return strings.TrimSpace(cleanUTF8(string(buf[0:p])))
+}
+
+func debug(m string) {
+	if dbg {
+		fmt.Println(m)
+	}
 }
 
 func getInt(buf []byte) int {

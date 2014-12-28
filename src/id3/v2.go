@@ -91,6 +91,8 @@ func (f *frame) Explain() string {
 	switch f.name {
 	case "COMM":
 		return "Comments"
+	case "GEOB":
+		return "Encapsulated Object"
 	case "PRIV":
 		return "Private Frame"
 	case "TALB":
@@ -147,12 +149,18 @@ func (f *frame) Explain() string {
 }
 
 func (f *frame) IsValid() bool {
-	if len(f.name) != 4 || f.size < 1 {
-		if len(f.name) > 0 {
-			fmt.Printf("Invalid name, found [%s]\n", f.name)
-		} else if len(f.data) > 0 {
-			fmt.Printf("Data with no name, [%s]\n", f.data)
+	if len(f.name) != 4 {
+		if len(f.data) > 0 && f.size > 0 {
+			debug(fmt.Sprintf("Name [%s] invalid length, but have data [%s]", f.name, f.data))
+		} else {
+			debug(fmt.Sprintf("Name [%s] invalid, no data", f.name))
 		}
+
+		return false
+	}
+
+	if f.size < 1 || len(f.data) < 1 {
+		debug(fmt.Sprintf("No data [%s] for name [%s]", f.data, f.name))
 
 		return false
 	}

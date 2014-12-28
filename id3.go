@@ -18,24 +18,38 @@ type LoggedError struct {
 	error
 }
 
-var commands = []*Command{
-	readCmd,
-}
+var (
+	commands = []*Command{
+		readCmd,
+	}
 
-const usageTemplate = `usage: go-id3 command [arguments]
+	isDebug = false
+)
+
+const (
+	usageTemplate = `usage: go-id3 [options] command [arguments]
 The commands are:
 {{range .}}
 	{{.Name | printf "%-11s"}} {{.Short}}{{end}}
 
 Use "go-id3 help [command]" for more information.
-`
 
-const helpTemplate = `usage: go-id3 {{.UsageLine}}
+Options:
+ -d		Enable debug mode
+`
+	helpTemplate = `usage: go-id3 {{.UsageLine}}
 {{.Long}}
 `
+	defaultDebug = false
+)
+
+func init() {
+	flag.BoolVar(&isDebug, "d", defaultDebug, "Provide debugging information (shorthand)")
+
+	flag.Usage = func() { usage(1) }
+}
 
 func main() {
-	flag.Usage = func() { usage(1) }
 	flag.Parse()
 	args := flag.Args()
 
