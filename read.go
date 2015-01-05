@@ -1,6 +1,6 @@
 package main
 
-import "github.com/cloudcloud/go-id3/src/id3"
+import "github.com/cloudcloud/go-id3/id3"
 
 var readCmd = &Command{
 	UsageLine: "read [filename]",
