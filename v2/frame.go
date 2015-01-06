@@ -1,6 +1,11 @@
 package v2
 
-import "fmt"
+import (
+	"encoding/binary"
+	"fmt"
+	"unicode/utf16"
+	"unicode/utf8"
+)
 
 const (
 	tag_length = 4
@@ -27,70 +32,25 @@ func NewFrame() *Frame {
 }
 
 func (t *Frame) Process(b []byte) []byte {
-	fmt.Println("In *Frame")
+	fmt.Println("Frame unimplemented Process()")
 
-	return b
+	return []byte{}
 }
 
-func (f *Frame) Explain() string {
-	switch f.Name {
-	case "GEOB":
-		return "Encapsulated Object"
-	case "PRIV":
-		return "Private Frame"
-	case "TALB":
-		return "Album Name"
-	case "TBPM":
-		return "Beats Per Minute"
-	case "TCOM":
-		return "Composer"
-	case "TCON":
-		return "Content Type"
-	case "TCOP":
-		return "Copyright"
-	case "TDAT":
-		return "Date"
-	case "TENC":
-		return "Encoded by"
-	case "TEXT":
-		return "Lyricist"
-	case "TFLT":
-		return "File Type"
-	case "TIME":
-		return "Time"
-	case "TIT2":
-		return "Title"
-	case "TLAN":
-		return "Language"
-	case "TLEN":
-		return "Length"
-	case "TOAL":
-		return "Original Album"
-	case "TOLY":
-		return "Original Lyricist"
-	case "TOPE":
-		return "Original Artist"
-	case "TORY":
-		return "Original Release Year"
-	case "TPE1":
-		return "Lead Performer"
-	case "TPUB":
-		return "Publisher"
-	case "TRCK":
-		return "Track Number"
-	case "TSSE":
-		return "Encoding Settings"
-	case "TXXX":
-		return "User Text"
-	case "TYER":
-		return "Year"
-	case "WXXX":
-		return "Provided URL"
-	default:
-		return "Unknown"
+func GetUtf(b []byte) string {
+	var e binary.ByteOrder = binary.BigEndian
+	if uint16(b[1])<<8|uint16(b[0]) == 0xFFEF {
+		e = binary.LittleEndian
 	}
-}
 
-func (f *Frame) IsValid() bool {
-	return false
+	utf := make([]uint16, (len(b)+(2-1))/2)
+	for i := 0; i+(2-1) < len(b); i += 2 {
+		utf[i/2] = e.Uint16(b[i:])
+	}
+
+	if len(b)/2 < len(utf) {
+		utf[len(utf)-1] = utf8.RuneError
+	}
+
+	return string(utf16.Decode(utf))
 }

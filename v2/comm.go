@@ -17,10 +17,8 @@ type FComm struct {
 	Grouping     bool `json:"grouping"`
 }
 
-func NewCOMM(n string) *FComm {
+func NewCOMM() *FComm {
 	c := new(FComm)
-
-	c.Name = n
 
 	c.TagPreserve = false
 	c.FilePreserve = false

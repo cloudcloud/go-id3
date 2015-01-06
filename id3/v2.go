@@ -90,7 +90,7 @@ func (i *Id3V2) Parse(f string) {
 
 func (i *Id3V2) chompFrame(b []byte) ([]byte, error) {
 	title := b[init_offset:tag_name_length]
-	b = b[version_index:]
+	b = b[version_index+1:]
 	t, err := switchTitle(title)
 
 	if err != nil {
@@ -105,10 +105,16 @@ func (i *Id3V2) chompFrame(b []byte) ([]byte, error) {
 func switchTitle(b []byte) (v2.IFrame, error) {
 	switch string(b) {
 	case "COMM":
-		return v2.NewCOMM(string(b)), nil
+		a := v2.NewCOMM()
+		//a.Name = string(b)
+
+		return a, nil
 
 	case "TYER":
-		return v2.NewTEXT(string(b)), nil
+		a := v2.NewTEXT()
+		//a.Name = string(b)
+
+		return a, nil
 	}
 
 	return nil, errors.New("Invalid title")

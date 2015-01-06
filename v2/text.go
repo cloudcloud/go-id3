@@ -5,9 +5,6 @@ import "fmt"
 type FText struct {
 	*Frame
 
-	Name string `json:"name"`
-	Size int    `json:"size"`
-
 	Flags        int  `json:"flags"`
 	TagPreserve  bool `json:"tag_preserve"`
 	FilePreserve bool `json:"file_preserve"`
@@ -17,10 +14,8 @@ type FText struct {
 	Grouping     bool `json:"grouping"`
 }
 
-func NewTEXT(n string) *FText {
+func NewTEXT() *FText {
 	c := new(FText)
-
-	c.Name = n
 
 	c.TagPreserve = false
 	c.FilePreserve = false
@@ -33,6 +28,9 @@ func NewTEXT(n string) *FText {
 }
 
 func (t *FText) Process(b []byte) []byte {
+	fmt.Println("Process out")
+	return b
+
 	t.Size = int(rune(b[0])<<21 | rune(b[1])<<14 | rune(b[2])<<7 | rune(b[3]))
 	t.Flags = int(rune(b[4])<<8 | rune(b[5]))
 
@@ -56,6 +54,15 @@ func (t *FText) Process(b []byte) []byte {
 		t.Grouping = true
 	}
 
-	fmt.Println("Have a TEXT")
-	return b[6:]
+	b = b[6:]
+	if b[0] == 0 {
+		t.Data = string(b[1:t.Size])
+	} else if b[0] == 1 {
+		t.Data = GetUtf(b[1:t.Size])
+	}
+
+	fmt.Println("Processed")
+
+	b = b[t.Size:]
+	return b
 }
