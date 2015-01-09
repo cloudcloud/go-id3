@@ -1,3 +1,5 @@
+// Package v2 provides specific functionality for working with the ID3 Version 2
+// file format and frames.
 package v2
 
 import (
@@ -11,10 +13,14 @@ const (
 	tag_length = 4
 )
 
+// IFrame is a shared interface for use with defining types of Frame formats
+// for processing within the ID3 tag.
 type IFrame interface {
 	Process(b []byte) []byte
 }
 
+// Frame defines a base structure shared across all Frame types. This frame
+// format is "inherited" within specific Frame type for shared usage.
 type Frame struct {
 	Name string      `json:"name"`
 	Data interface{} `json:"name"`
@@ -25,18 +31,25 @@ func process(o IFrame, b []byte) {
 	o.Process(b)
 }
 
+// NewFrame will provision an instance of a the base Frame.
 func NewFrame() *Frame {
 	f := new(Frame)
 
 	return f
 }
 
+// Process completes the processing from source of the current frame. The
+// specific implementation is overridden within each specific frame
+// implementation.
 func (t *Frame) Process(b []byte) []byte {
 	fmt.Println("Frame unimplemented Process()")
 
 	return []byte{}
 }
 
+// GetUtf is a shared function to help with the parsing and processing of Utf
+// strings. The spec defines the option use Utf16 instead of ISO formats so
+// this function is used for that processing.
 func GetUtf(b []byte) string {
 	var e binary.ByteOrder = binary.BigEndian
 	if uint16(b[1])<<8|uint16(b[0]) == 0xFFEF {

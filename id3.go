@@ -9,11 +9,14 @@ import (
 	"text/template"
 )
 
+// Command defines the attributes and usage processing for a specific command
+// passed to the binary for execution.
 type Command struct {
 	Run                    func(args []string)
 	UsageLine, Short, Long string
 }
 
+// LoggedError defines a specific workable error format.
 type LoggedError struct {
 	error
 }
@@ -109,6 +112,9 @@ func tmpl(w io.Writer, text string, data interface{}) {
 	}
 }
 
+// Name provides a way to display the name of a command. As each
+// command is stored within the structure nameless, this function
+// will process what exists to determine the name.
 func (cmd *Command) Name() string {
 	name := cmd.UsageLine
 	i := strings.Index(name, " ")
