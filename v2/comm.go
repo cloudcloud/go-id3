@@ -2,6 +2,8 @@ package v2
 
 import "fmt"
 
+// FComm defines the Frame structure for the COMM tag
+// part of Id3 V2.
 type FComm struct {
 	*Frame
 
@@ -17,6 +19,8 @@ type FComm struct {
 	Grouping     bool `json:"grouping"`
 }
 
+// NewCOMM will provision a new instance of the FComm struct
+// and make it available for processing.
 func NewCOMM() *FComm {
 	c := new(FComm)
 
@@ -30,6 +34,8 @@ func NewCOMM() *FComm {
 	return c
 }
 
+// Process completes the processing of the proceeding bytes
+// for the COMM frame type.
 func (t *FComm) Process(b []byte) []byte {
 	fmt.Println("Have a COMM")
 

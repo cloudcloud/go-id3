@@ -2,6 +2,9 @@ package v2
 
 import "fmt"
 
+// FText provides the structure for processing the TEXT frame
+// type of Id3 V2. This struct is generic for most TEXT style
+// frames.
 type FText struct {
 	*Frame
 
@@ -14,6 +17,8 @@ type FText struct {
 	Grouping     bool `json:"grouping"`
 }
 
+// NewTEXT will provision a new instance of the FText struct
+// for processing.
 func NewTEXT() *FText {
 	c := new(FText)
 
@@ -27,6 +32,8 @@ func NewTEXT() *FText {
 	return c
 }
 
+// Process will complete the processing within the provided bytes
+// of the full Frame for TEXT.
 func (t *FText) Process(b []byte) []byte {
 	fmt.Println("Process out")
 	return b

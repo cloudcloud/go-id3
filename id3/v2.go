@@ -10,23 +10,25 @@ import (
 )
 
 const (
-	header_length   = 10
-	tag_name_length = 4
-	version_index   = 3
-	flag_index      = 5
-	size_begin      = 6
-	size_length     = 4
-	init_offset     = 0
+	headerLength  = 10
+	tagNameLength = 4
+	versionIndex  = 3
+	flagIndex     = 5
+	sizeBegin     = 6
+	sizeLength    = 4
+	initOffset    = 0
 
-	give_title  = 0
-	give_object = 1
+	giveTitle  = 0
+	giveObject = 1
 )
 
 var (
 	err error
 )
 
-type Id3V2 struct {
+// ID3V2 provides structure for processing and working with
+// full ID3 V2 tags and their frames.
+type ID3V2 struct {
 	Items []v2.Frame `json:"items"`
 	Major int        `json:"major_version"`
 	Min   int        `json:"min_version"`
@@ -39,8 +41,9 @@ type Id3V2 struct {
 	Footer         bool `json:"footer"`
 }
 
-func NewV2() *Id3V2 {
-	i := new(Id3V2)
+// NewV2 will provision an instance of ID3V2.
+func NewV2() *ID3V2 {
+	i := new(ID3V2)
 
 	i.Unsynchronised = false
 	i.Extended = false
@@ -50,18 +53,20 @@ func NewV2() *Id3V2 {
 	return i
 }
 
-func (i *Id3V2) Parse(f string) {
-	b := fileToBuffer(f, header_length, init_offset)
-	if getString(b[init_offset:version_index]) != "ID3" {
+// Parse completes the full processing of the file provided
+// by the string argument.
+func (i *ID3V2) Parse(f string) {
+	b := fileToBuffer(f, headerLength, initOffset)
+	if getString(b[initOffset:versionIndex]) != "ID3" {
 		return
 	}
 
 	file, _ := os.Open(f)
-	file.Seek(header_length, init_offset)
+	file.Seek(headerLength, initOffset)
 
-	i.Major, _ = strconv.Atoi(fmt.Sprintf("%d", b[version_index]))
-	i.Min, _ = strconv.Atoi(fmt.Sprintf("%d", b[version_index+1]))
-	i.Flag = rune(b[flag_index])
+	i.Major, _ = strconv.Atoi(fmt.Sprintf("%d", b[versionIndex]))
+	i.Min, _ = strconv.Atoi(fmt.Sprintf("%d", b[versionIndex+1]))
+	i.Flag = rune(b[flagIndex])
 
 	if i.Major > 2 {
 		if i.Flag&128 == 128 {
@@ -78,8 +83,8 @@ func (i *Id3V2) Parse(f string) {
 		}
 	}
 
-	i.Size = int(rune(b[size_begin])<<21 | rune(b[size_begin+1])<<14 | rune(b[size_begin+2])<<7 | rune(b[size_begin+3]))
-	b = fileToBuffer(f, i.Size, header_length)
+	i.Size = int(rune(b[sizeBegin])<<21 | rune(b[sizeBegin+1])<<14 | rune(b[sizeBegin+2])<<7 | rune(b[sizeBegin+3]))
+	b = fileToBuffer(f, i.Size, headerLength)
 
 	for {
 		if b, err = i.chompFrame(b); err != nil {
@@ -88,9 +93,9 @@ func (i *Id3V2) Parse(f string) {
 	}
 }
 
-func (i *Id3V2) chompFrame(b []byte) ([]byte, error) {
-	title := b[init_offset:tag_name_length]
-	b = b[version_index+1:]
+func (i *ID3V2) chompFrame(b []byte) ([]byte, error) {
+	title := b[initOffset:tagNameLength]
+	b = b[versionIndex+1:]
 	t, err := switchTitle(title)
 
 	if err != nil {
@@ -117,5 +122,5 @@ func switchTitle(b []byte) (v2.IFrame, error) {
 		return a, nil
 	}
 
-	return nil, errors.New("Invalid title")
+	return nil, errors.New("invalid title")
 }

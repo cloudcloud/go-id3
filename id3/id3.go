@@ -1,3 +1,5 @@
+// Package id3 provides standard avenues for processing of
+// id3 tags within mp3 files.
 package id3
 
 import (
@@ -15,47 +17,55 @@ var (
 	dbg     bool
 )
 
-type Id3 struct {
+// ID3 provides a simple object for both ID3 tag types.
+type ID3 struct {
 	Filename string `json:"filename"`
-	Id3V1    *Id3V1 `json:"id3v1"`
-	Id3V2    *Id3V2 `json:"id3v2"`
+	ID3V1    *ID3V1 `json:"id3v1"`
+	ID3V2    *ID3V2 `json:"id3v2"`
 }
 
-func New(f string) *Id3 {
+// New will provision a new instance of the ID3 struct for
+// interaction with both tag types.
+func New(f string) *ID3 {
 	dbg = false
 
-	i := new(Id3)
+	i := new(ID3)
 	i.Filename = f
 
 	return i
 }
 
-func (i *Id3) Process() *Id3 {
-	i.Id3V1 = NewV1()
-	i.Id3V1.Parse(i.Filename)
+// Process will use the already provided filename and scour
+// for both tag types.
+func (i *ID3) Process() *ID3 {
+	i.ID3V1 = NewV1()
+	i.ID3V1.Parse(i.Filename)
 
-	i.Id3V2 = NewV2()
-	i.Id3V2.Parse(i.Filename)
+	i.ID3V2 = NewV2()
+	i.ID3V2.Parse(i.Filename)
 
 	return i
 }
 
-func (i *Id3) SetDebug() {
+// SetDebug will force the debug mode to be enabled.
+func (i *ID3) SetDebug() {
 	dbg = true
 }
 
-func (i *Id3) PrettyPrint() {
+// PrettyPrint will format and dump the full output of the
+// found tags to STDOUT.
+func (i *ID3) PrettyPrint() {
 	w := os.Stdout
 	text := `All ID3v1 information:
-Artist: {{.Id3V1.Artist}}
-Title: {{.Id3V1.Title}}
-Album: {{.Id3V1.Album}}
-Year: {{.Id3V1.Year}}
-Comment: {{.Id3V1.Comment}}
-Track: {{.Id3V1.Track}}
-Genre ID: {{.Id3V1.Genre}}
+Artist: {{.ID3V1.Artist}}
+Title: {{.ID3V1.Title}}
+Album: {{.ID3V1.Album}}
+Year: {{.ID3V1.Year}}
+Comment: {{.ID3V1.Comment}}
+Track: {{.ID3V1.Track}}
+Genre ID: {{.ID3V1.Genre}}
 
-All ID3v2 information:{{range .Id3V2.Items}}
+All ID3v2 information:{{range .ID3V2.Items}}
  {{.Name}} ({{.Explain | printf "%-20s"}})[{{.Length | printf "%-3s"}}] "{{.Content}}"{{end}}
 `
 

@@ -6,17 +6,19 @@ import (
 )
 
 const (
-	tag_size  = 128
-	tag_start = 3
+	tagSize  = 128
+	tagStart = 3
 
-	title_end   = 33
-	artist_end  = 63
-	album_end   = 93
-	year_end    = 97
-	comment_end = 125
+	titleEnd   = 33
+	artistEnd  = 63
+	albumEnd   = 93
+	yearEnd    = 97
+	commentEnd = 125
 )
 
-type Id3V1 struct {
+// ID3V1 provides the full structure for processing
+// and working with ID3 V1 tags.
+type ID3V1 struct {
 	Artist  string `json:"artist"`
 	Title   string `json:"title"`
 	Album   string `json:"album"`
@@ -26,25 +28,28 @@ type Id3V1 struct {
 	Genre   int    `json:"genre"`
 }
 
-func NewV1() *Id3V1 {
-	i := new(Id3V1)
+// NewV1 will provision an instance of ID3V1.
+func NewV1() *ID3V1 {
+	i := new(ID3V1)
 
 	return i
 }
 
-func (i *Id3V1) Parse(f string) {
-	b := fileToBuffer(f, tag_size, -tag_size)
+// Parse completes the actual processing of the file
+// and extracts the tag information.
+func (i *ID3V1) Parse(f string) {
+	b := fileToBuffer(f, tagSize, -tagSize)
 
-	if getString(b[0:tag_start]) != "TAG" {
+	if getString(b[0:tagStart]) != "TAG" {
 		return
 	}
 
-	i.Title = getString(b[tag_start:title_end])
-	i.Artist = getString(b[title_end:artist_end])
-	i.Album = getString(b[artist_end:album_end])
-	i.Year = getInt(b[album_end:year_end])
-	i.Comment = getString(b[year_end:comment_end])
+	i.Title = getString(b[tagStart:titleEnd])
+	i.Artist = getString(b[titleEnd:artistEnd])
+	i.Album = getString(b[artistEnd:albumEnd])
+	i.Year = getInt(b[albumEnd:yearEnd])
+	i.Comment = getString(b[yearEnd:commentEnd])
 
-	i.Track, _ = strconv.Atoi(fmt.Sprintf("%d", b[comment_end+1]))
-	i.Genre, _ = strconv.Atoi(fmt.Sprintf("%d", b[comment_end+2]))
+	i.Track, _ = strconv.Atoi(fmt.Sprintf("%d", b[commentEnd+1]))
+	i.Genre, _ = strconv.Atoi(fmt.Sprintf("%d", b[commentEnd+2]))
 }

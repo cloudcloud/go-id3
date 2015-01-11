@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	tag_length = 4
+	tagLength = 4
 )
 
 // IFrame is a shared interface for use with defining types of Frame formats
