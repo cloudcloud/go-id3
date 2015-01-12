@@ -23,7 +23,7 @@ type IFrame interface {
 // format is "inherited" within specific Frame type for shared usage.
 type Frame struct {
 	Name string      `json:"name"`
-	Data interface{} `json:"name"`
+	Data interface{} `json:"data"`
 	Size int         `json:"size"`
 }
 
@@ -51,7 +51,9 @@ func (t *Frame) Process(b []byte) []byte {
 // strings. The spec defines the option use Utf16 instead of ISO formats so
 // this function is used for that processing.
 func GetUtf(b []byte) string {
-	var e binary.ByteOrder = binary.BigEndian
+	var e binary.ByteOrder
+
+	e = binary.BigEndian
 	if uint16(b[1])<<8|uint16(b[0]) == 0xFFEF {
 		e = binary.LittleEndian
 	}

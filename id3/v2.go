@@ -110,15 +110,15 @@ func (i *ID3V2) chompFrame(b []byte) ([]byte, error) {
 func switchTitle(b []byte) (v2.IFrame, error) {
 	switch string(b) {
 	case "COMM":
-		a := v2.NewCOMM()
-		//a.Name = string(b)
-
+		a := v2.NewCOMM("COMM")
 		return a, nil
 
 	case "TYER":
-		a := v2.NewTEXT()
-		//a.Name = string(b)
+		a := v2.NewTEXT("TYER")
+		return a, nil
 
+	case "TIT2":
+		a := v2.NewTEXT("TIT2")
 		return a, nil
 	}
 

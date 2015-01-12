@@ -8,6 +8,12 @@ import "fmt"
 type FText struct {
 	*Frame
 
+	// if we don't duplicate the variables here, the
+	// runtime instance will panic
+	Name string      `json:"name"`
+	Data interface{} `json:"data"`
+	Size int         `json:"size"`
+
 	Flags        int  `json:"flags"`
 	TagPreserve  bool `json:"tag_preserve"`
 	FilePreserve bool `json:"file_preserve"`
@@ -19,8 +25,10 @@ type FText struct {
 
 // NewTEXT will provision a new instance of the FText struct
 // for processing.
-func NewTEXT() *FText {
+func NewTEXT(n string) *FText {
 	c := new(FText)
+
+	c.Name = n
 
 	c.TagPreserve = false
 	c.FilePreserve = false
@@ -35,9 +43,6 @@ func NewTEXT() *FText {
 // Process will complete the processing within the provided bytes
 // of the full Frame for TEXT.
 func (t *FText) Process(b []byte) []byte {
-	fmt.Println("Process out")
-	return b
-
 	t.Size = int(rune(b[0])<<21 | rune(b[1])<<14 | rune(b[2])<<7 | rune(b[3]))
 	t.Flags = int(rune(b[4])<<8 | rune(b[5]))
 

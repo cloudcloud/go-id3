@@ -7,8 +7,11 @@ import "fmt"
 type FComm struct {
 	*Frame
 
-	Name string `json:"name"`
-	Size int    `json:"size"`
+	// if we don't duplicate the variables here, the
+	// runtime instance will panic
+	Name string      `json:"name"`
+	Data interface{} `json:"data"`
+	Size int         `json:"size"`
 
 	Flags        int  `json:"flags"`
 	TagPreserve  bool `json:"tag_preserve"`
@@ -21,8 +24,10 @@ type FComm struct {
 
 // NewCOMM will provision a new instance of the FComm struct
 // and make it available for processing.
-func NewCOMM() *FComm {
+func NewCOMM(n string) *FComm {
 	c := new(FComm)
+
+	c.Name = n
 
 	c.TagPreserve = false
 	c.FilePreserve = false
