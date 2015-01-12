@@ -6,13 +6,7 @@ import "fmt"
 // type of Id3 V2. This struct is generic for most TEXT style
 // frames.
 type FText struct {
-	*Frame
-
-	// if we don't duplicate the variables here, the
-	// runtime instance will panic
-	Name string      `json:"name"`
-	Data interface{} `json:"data"`
-	Size int         `json:"size"`
+	Frame
 
 	Flags        int  `json:"flags"`
 	TagPreserve  bool `json:"tag_preserve"`
@@ -21,6 +15,8 @@ type FText struct {
 	Compression  bool `json:"compression"`
 	Encryption   bool `json:"encryption"`
 	Grouping     bool `json:"grouping"`
+
+	Utf16 bool `json:"utf16"`
 }
 
 // NewTEXT will provision a new instance of the FText struct
@@ -68,12 +64,15 @@ func (t *FText) Process(b []byte) []byte {
 
 	b = b[6:]
 	if b[0] == 0 {
+		t.Utf16 = false
 		t.Data = string(b[1:t.Size])
 	} else if b[0] == 1 {
+		fmt.Println(b[1:t.Size])
+		t.Utf16 = true
 		t.Data = GetUtf(b[1:t.Size])
 	}
 
-	fmt.Println("Processed")
+	fmt.Printf("[%s][%s]\n\n", t.Name, t.Data)
 
 	b = b[t.Size:]
 	return b

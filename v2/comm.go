@@ -5,13 +5,7 @@ import "fmt"
 // FComm defines the Frame structure for the COMM tag
 // part of Id3 V2.
 type FComm struct {
-	*Frame
-
-	// if we don't duplicate the variables here, the
-	// runtime instance will panic
-	Name string      `json:"name"`
-	Data interface{} `json:"data"`
-	Size int         `json:"size"`
+	Frame
 
 	Flags        int  `json:"flags"`
 	TagPreserve  bool `json:"tag_preserve"`
