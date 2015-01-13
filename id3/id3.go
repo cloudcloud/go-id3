@@ -66,7 +66,7 @@ Track: {{.ID3V1.Track}}
 Genre ID: {{.ID3V1.Genre}}
 
 All ID3v2 information:{{range .ID3V2.Items}}
- {{.Name}} ({{.Explain | printf "%-20s"}})[{{.Length | printf "%-3s"}}] "{{.Content}}"{{end}}
+ {{.GetName}} {{.GetExplain | printf "%-20s"}}[{{.GetLength | printf "%-3s"}}] "{{.DisplayContent}}"{{end}}
 `
 
 	t := template.New("top")

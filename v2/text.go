@@ -62,18 +62,29 @@ func (t *FText) Process(b []byte) []byte {
 		t.Grouping = true
 	}
 
+	fmt.Printf("Size [%d]\n", t.Size)
+
 	b = b[6:]
 	if b[0] == 0 {
 		t.Utf16 = false
 		t.Data = string(b[1:t.Size])
 	} else if b[0] == 1 {
-		fmt.Println(b[1:t.Size])
 		t.Utf16 = true
 		t.Data = GetUtf(b[1:t.Size])
 	}
 
-	fmt.Printf("[%s][%s]\n\n", t.Name, t.Data)
-
 	b = b[t.Size:]
 	return b
+}
+
+// Explain provides a description of the specific TEXT frame.
+func (t *FText) Explain() string {
+	a := "("
+
+	switch t.Name {
+	case "TIT2":
+		a += "Title/Songname/Content Description"
+	}
+
+	return a + ")"
 }

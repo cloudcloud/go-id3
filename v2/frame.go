@@ -16,6 +16,12 @@ const (
 // IFrame is a shared interface for use with defining types of Frame formats
 // for processing within the ID3 tag.
 type IFrame interface {
+	DisplayContent() string
+
+	GetExplain() string
+	GetLength() string
+	GetName() string
+
 	Process(b []byte) []byte
 }
 
@@ -47,15 +53,39 @@ func (t *Frame) Process(b []byte) []byte {
 	return []byte{}
 }
 
+// DisplayContent will provide a visual representation for pretty printing
+// and basic display. This may not necessarily be the actual content.
+func (t *Frame) DisplayContent() string {
+	return fmt.Sprintf("%s", t.Data)
+}
+
+// GetExplain will describe the current field based on the name.
+func (t *Frame) GetExplain() string {
+	return "{}"
+}
+
+// GetLength will return a string of the Length for the frame.
+func (t *Frame) GetLength() string {
+	return string(t.Size)
+}
+
+// GetName will retrieve the current Frame name.
+func (t *Frame) GetName() string {
+	return t.Name
+}
+
 // GetUtf is a shared function to help with the parsing and processing of Utf
 // strings. The spec defines the option use Utf16 instead of ISO formats so
 // this function is used for that processing.
 func GetUtf(b []byte) string {
 	var e binary.ByteOrder
 
-	e = binary.BigEndian
-	if uint16(b[1])<<8|uint16(b[0]) == 0xFFEF {
+	if uint16(b[0])<<8|uint16(b[1]) == 65534 {
 		e = binary.LittleEndian
+	} else if uint16(b[0])<<8|uint16(b[1]) == 65279 {
+		e = binary.BigEndian
+	} else {
+		return string(b)
 	}
 
 	utf := make([]uint16, (len(b)+(2-1))/2)
