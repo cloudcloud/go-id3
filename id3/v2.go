@@ -29,11 +29,12 @@ var (
 // ID3V2 provides structure for processing and working with
 // full ID3 V2 tags and their frames.
 type ID3V2 struct {
-	Items []v2.Frame `json:"items"`
-	Major int        `json:"major_version"`
-	Min   int        `json:"min_version"`
-	Flag  rune       `json:"flag"`
-	Size  int        `json:"size"`
+	Items []v2.IFrame `json:"items"`
+
+	Major int  `json:"major_version"`
+	Min   int  `json:"min_version"`
+	Flag  rune `json:"flag"`
+	Size  int  `json:"size"`
 
 	Unsynchronised bool `json:"unsynchronised"`
 	Extended       bool `json:"extended"`
@@ -102,24 +103,32 @@ func (i *ID3V2) chompFrame(b []byte) ([]byte, error) {
 		return b, err
 	}
 
-	t.Process(b)
+	b = t.Process(b)
+	i.Items = append(i.Items, t)
 
 	return b, nil
 }
 
 func switchTitle(b []byte) (v2.IFrame, error) {
 	switch string(b) {
+	case "APIC":
+		a := v2.NewAPIC(string(b))
+		return a, nil
+
 	case "COMM":
-		a := v2.NewCOMM("COMM")
+		a := v2.NewCOMM(string(b))
 		return a, nil
 
-	case "TYER":
-		a := v2.NewTEXT("TYER")
+	case "TALB", "TCOM", "TCON", "TCOP", "TENC", "TIT2", "TOPE", "TPE1", "TPE2", "TRCK", "TYER":
+		a := v2.NewTEXT(string(b))
 		return a, nil
 
-	case "TIT2":
-		a := v2.NewTEXT("TIT2")
+	case "WXXX":
+		a := v2.NewWXXX(string(b))
 		return a, nil
+
+	default:
+		fmt.Println(string(b), b)
 	}
 
 	return nil, errors.New("invalid title")

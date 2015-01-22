@@ -1,19 +1,9 @@
 package v2
 
-import "fmt"
-
 // FComm defines the Frame structure for the COMM tag
 // part of Id3 V2.
 type FComm struct {
 	Frame
-
-	Flags        int  `json:"flags"`
-	TagPreserve  bool `json:"tag_preserve"`
-	FilePreserve bool `json:"file_preserve"`
-	ReadOnly     bool `json:"read_only"`
-	Compression  bool `json:"compression"`
-	Encryption   bool `json:"encryption"`
-	Grouping     bool `json:"grouping"`
 }
 
 // NewCOMM will provision a new instance of the FComm struct
@@ -33,10 +23,7 @@ func NewCOMM(n string) *FComm {
 	return c
 }
 
-// Process completes the processing of the proceeding bytes
-// for the COMM frame type.
-func (t *FComm) Process(b []byte) []byte {
-	fmt.Println("Have a COMM")
-
-	return b
+// GetExplain will return a string representing the type of content.
+func (t *FComm) GetExplain() string {
+	return "(Comments)"
 }

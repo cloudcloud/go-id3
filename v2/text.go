@@ -1,22 +1,10 @@
 package v2
 
-import "fmt"
-
 // FText provides the structure for processing the TEXT frame
 // type of Id3 V2. This struct is generic for most TEXT style
 // frames.
 type FText struct {
 	Frame
-
-	Flags        int  `json:"flags"`
-	TagPreserve  bool `json:"tag_preserve"`
-	FilePreserve bool `json:"file_preserve"`
-	ReadOnly     bool `json:"read_only"`
-	Compression  bool `json:"compression"`
-	Encryption   bool `json:"encryption"`
-	Grouping     bool `json:"grouping"`
-
-	Utf16 bool `json:"utf16"`
 }
 
 // NewTEXT will provision a new instance of the FText struct
@@ -36,54 +24,87 @@ func NewTEXT(n string) *FText {
 	return c
 }
 
-// Process will complete the processing within the provided bytes
-// of the full Frame for TEXT.
-func (t *FText) Process(b []byte) []byte {
-	t.Size = int(rune(b[0])<<21 | rune(b[1])<<14 | rune(b[2])<<7 | rune(b[3]))
-	t.Flags = int(rune(b[4])<<8 | rune(b[5]))
-
-	if b[4]&128 == 128 {
-		t.TagPreserve = true
-	}
-	if b[4]&64 == 64 {
-		t.FilePreserve = true
-	}
-	if b[4]&32 == 32 {
-		t.ReadOnly = true
-	}
-
-	if b[5]&128 == 128 {
-		t.Compression = true
-	}
-	if b[5]&64 == 64 {
-		t.Encryption = true
-	}
-	if b[5]&32 == 32 {
-		t.Grouping = true
-	}
-
-	fmt.Printf("Size [%d]\n", t.Size)
-
-	b = b[6:]
-	if b[0] == 0 {
-		t.Utf16 = false
-		t.Data = string(b[1:t.Size])
-	} else if b[0] == 1 {
-		t.Utf16 = true
-		t.Data = GetUtf(b[1:t.Size])
-	}
-
-	b = b[t.Size:]
-	return b
-}
-
-// Explain provides a description of the specific TEXT frame.
-func (t *FText) Explain() string {
+// GetExplain provides a description of the specific TEXT frame.
+func (t *FText) GetExplain() string {
 	a := "("
 
 	switch t.Name {
+	case "TALB":
+		a += "Album/Movie/Show title"
+	case "TBPM":
+		a += "BPM (beats per minute)"
+	case "TCOM":
+		a += "Composer"
+	case "TCON":
+		a += "Content type"
+	case "TCOP":
+		a += "Copyright message"
+	case "TDAT":
+		a += "Date"
+	case "TDLY":
+		a += "Playlist delay"
+	case "TENC":
+		a += "Encoded by"
+	case "TEXT":
+		a += "Lyricist/Text writer"
+	case "TFLT":
+		a += "File type"
+	case "TIME":
+		a += "Time"
+	case "TIT1":
+		a += "Content group description"
 	case "TIT2":
-		a += "Title/Songname/Content Description"
+		a += "Title/songname/content description"
+	case "TIT3":
+		a += "Subtitle/Description refinement"
+	case "TKEY":
+		a += "Initial key"
+	case "TLAN":
+		a += "Language(s)"
+	case "TLEN":
+		a += "Length"
+	case "TMED":
+		a += "Media type"
+	case "TOAL":
+		a += "Original album/movie/show title"
+	case "TOFN":
+		a += "Original filename"
+	case "TOLY":
+		a += "Original lyricist(s)/text writer(s)"
+	case "TOPE":
+		a += "Original artist(s)/performer(s)"
+	case "TORY":
+		a += "Original release year"
+	case "TOWN":
+		a += "File owner/licensee"
+	case "TPE1":
+		a += "Lead performer(s)/Soloist(s)"
+	case "TPE2":
+		a += "Band/orchestra/accompaniment"
+	case "TPE3":
+		a += "Conductor/performer refinement"
+	case "TPE4":
+		a += "Interpreted, remixed, or otherwise modified by"
+	case "TPOS":
+		a += "Part of a set"
+	case "TPUB":
+		a += "Publisher"
+	case "TRCK":
+		a += "Track number/Position in set"
+	case "TRDA":
+		a += "Recording dates"
+	case "TRSN":
+		a += "Internet radio station name"
+	case "TRSO":
+		a += "Internet radio station owner"
+	case "TSIZ":
+		a += "Size"
+	case "TSRC":
+		a += "ISRC (international standard recording code)"
+	case "TSSE":
+		a += "Software/Hardware and settings used for encoding"
+	case "TYER":
+		a += "Year"
 	}
 
 	return a + ")"
