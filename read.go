@@ -30,7 +30,11 @@ func readRun(args []string) {
 	}
 
 	filename = args[0]
-	i := id3.New(filename)
+	i, err := id3.New(filename)
+	if err != nil {
+		errorf("File does not exist")
+	}
+
 	if isDebug {
 		i.SetDebug()
 	}

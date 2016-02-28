@@ -26,13 +26,17 @@ type ID3 struct {
 
 // New will provision a new instance of the ID3 struct for
 // interaction with both tag types.
-func New(f string) *ID3 {
+func New(f string) (*ID3, error) {
 	dbg = false
 
 	i := new(ID3)
 	i.Filename = f
 
-	return i
+	if _, err := os.Stat(i.Filename); err != nil {
+		return nil, err
+	}
+
+	return i, nil
 }
 
 // Process will use the already provided filename and scour
