@@ -26,9 +26,9 @@ var (
 	err error
 )
 
-// ID3V2 provides structure for processing and working with
+// V2 provides structure for processing and working with
 // full ID3 V2 tags and their frames.
-type ID3V2 struct {
+type V2 struct {
 	Items []v2.IFrame `json:"items"`
 
 	Major int  `json:"major_version"`
@@ -42,9 +42,9 @@ type ID3V2 struct {
 	Footer         bool `json:"footer"`
 }
 
-// NewV2 will provision an instance of ID3V2.
-func NewV2() *ID3V2 {
-	i := new(ID3V2)
+// NewV2 will provision an instance of V2.
+func NewV2() *V2 {
+	i := new(V2)
 
 	i.Unsynchronised = false
 	i.Extended = false
@@ -56,7 +56,7 @@ func NewV2() *ID3V2 {
 
 // Parse completes the full processing of the file provided
 // by the string argument.
-func (i *ID3V2) Parse(f string) {
+func (i *V2) Parse(f string) {
 	b := fileToBuffer(f, headerLength, initOffset)
 	if getString(b[initOffset:versionIndex]) != "ID3" {
 		return
@@ -94,7 +94,29 @@ func (i *ID3V2) Parse(f string) {
 	}
 }
 
-func (i *ID3V2) chompFrame(b []byte) ([]byte, error) {
+// HasFrame will look for a frame matching the name.
+func (i *V2) HasFrame(f string) bool {
+	for x := 0; x < len(i.Items); x++ {
+		if i.Items[x].GetName() == f {
+			return true
+		}
+	}
+
+	return false
+}
+
+// GetFrameValue will find a frame matching the name and retrieve its value.
+func (i *V2) GetFrameValue(f string) string {
+	for x := 0; x < len(i.Items); x++ {
+		if i.Items[x].GetName() == f {
+			return i.Items[x].DisplayContent()
+		}
+	}
+
+	return ""
+}
+
+func (i *V2) chompFrame(b []byte) ([]byte, error) {
 	title := b[initOffset:tagNameLength]
 	b = b[versionIndex+1:]
 	t, err := switchTitle(title)

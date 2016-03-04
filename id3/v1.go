@@ -16,9 +16,9 @@ const (
 	commentEnd = 125
 )
 
-// ID3V1 provides the full structure for processing
+// V1 provides the full structure for processing
 // and working with ID3 V1 tags.
-type ID3V1 struct {
+type V1 struct {
 	Artist  string `json:"artist"`
 	Title   string `json:"title"`
 	Album   string `json:"album"`
@@ -28,16 +28,16 @@ type ID3V1 struct {
 	Genre   int    `json:"genre"`
 }
 
-// NewV1 will provision an instance of ID3V1.
-func NewV1() *ID3V1 {
-	i := new(ID3V1)
+// NewV1 will provision an instance of V1.
+func NewV1() *V1 {
+	i := new(V1)
 
 	return i
 }
 
 // Parse completes the actual processing of the file
 // and extracts the tag information.
-func (i *ID3V1) Parse(f string) {
+func (i *V1) Parse(f string) {
 	b := fileToBuffer(f, tagSize, -tagSize)
 
 	if getString(b[0:tagStart]) != "TAG" {

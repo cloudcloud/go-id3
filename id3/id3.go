@@ -20,8 +20,8 @@ var (
 // ID3 provides a simple object for both ID3 tag types.
 type ID3 struct {
 	Filename string `json:"filename"`
-	ID3V1    *ID3V1 `json:"id3v1"`
-	ID3V2    *ID3V2 `json:"id3v2"`
+	V1       *V1    `json:"id3v1"`
+	V2       *V2    `json:"id3v2"`
 }
 
 // New will provision a new instance of the ID3 struct for
@@ -42,11 +42,11 @@ func New(f string) (*ID3, error) {
 // Process will use the already provided filename and scour
 // for both tag types.
 func (i *ID3) Process() *ID3 {
-	i.ID3V1 = NewV1()
-	i.ID3V1.Parse(i.Filename)
+	i.V1 = NewV1()
+	i.V1.Parse(i.Filename)
 
-	i.ID3V2 = NewV2()
-	i.ID3V2.Parse(i.Filename)
+	i.V2 = NewV2()
+	i.V2.Parse(i.Filename)
 
 	return i
 }
@@ -61,15 +61,15 @@ func (i *ID3) SetDebug() {
 func (i *ID3) PrettyPrint() {
 	w := os.Stdout
 	text := `All ID3v1 information:
-Artist: {{.ID3V1.Artist}}
-Title: {{.ID3V1.Title}}
-Album: {{.ID3V1.Album}}
-Year: {{.ID3V1.Year}}
-Comment: {{.ID3V1.Comment}}
-Track: {{.ID3V1.Track}}
-Genre ID: {{.ID3V1.Genre}}
+Artist: {{.V1.Artist}}
+Title: {{.V1.Title}}
+Album: {{.V1.Album}}
+Year: {{.V1.Year}}
+Comment: {{.V1.Comment}}
+Track: {{.V1.Track}}
+Genre ID: {{.V1.Genre}}
 
-All ID3v2 information:{{range .ID3V2.Items}}
+All ID3v2 information:{{range .V2.Items}}
  {{.GetName}} {{.GetExplain | printf "%-40s"}} {{.GetLength | printf "%-7s"}} "{{.DisplayContent}}"{{end}}
 `
 
