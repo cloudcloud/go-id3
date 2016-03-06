@@ -3,6 +3,7 @@ package id3
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 // Getters for information trawled via the ID3 processing.
@@ -39,6 +40,9 @@ func (i *ID3) GetAlbum() string {
 	if len(a) < 1 {
 		a = i.V2.GetFrameValue("TOAL")
 	}
+	if len(a) < 1 {
+		a = i.V1.Album
+	}
 
 	return a
 }
@@ -50,6 +54,13 @@ func (i *ID3) GetTitle() string {
 
 	if len(s) > 0 && len(tmpTitle) > 0 {
 		return fmt.Sprintf("%s (%s)", s, tmpTitle)
+	}
+
+	if len(s) < 1 {
+		s = i.V1.Title
+	}
+	if len(s) < 1 {
+		s = tmpTitle
 	}
 
 	return s
@@ -115,7 +126,7 @@ func (i *ID3) GetReleaseYear() int {
 	x, err := strconv.Atoi(i.V2.GetFrameValue("TORY"))
 
 	if err != nil {
-		return 0
+		return i.V1.Year
 	}
 	return x
 }
@@ -127,7 +138,13 @@ func (i *ID3) GetTime() string {
 
 // GetGenre provides information about genre details.
 func (i *ID3) GetGenre() string {
-	return i.V2.GetFrameValue("TIT1")
+	a := i.V2.GetFrameValue("TIT1")
+
+	if i.V1.Genre > 0 {
+		a = fmt.Sprintf("%s (%v)", a, i.V1.Genre)
+	}
+
+	return strings.TrimSpace(a)
 }
 
 // GetLanguage will give the language of the track.
@@ -197,8 +214,7 @@ func (i *ID3) GetTrackNumber() int {
 			return x
 		}
 
-		// single char non-int
-		return 0
+		return i.V1.Track
 	}
 
 	if a[1] == '/' {
@@ -213,10 +229,15 @@ func (i *ID3) GetTrackNumber() int {
 	if err == nil {
 		return x
 	}
-	return 0
+	return i.V1.Track
 }
 
 // GetComment will grab any comment field in the track.
 func (i *ID3) GetComment() string {
-	return i.V2.GetFrameValue("COMM")
+	a := i.V2.GetFrameValue("COMM")
+	if len(a) < 1 {
+		a = i.V1.Comment
+	}
+
+	return a
 }

@@ -60,14 +60,13 @@ func (i *ID3) SetDebug() {
 // found tags to STDOUT.
 func (i *ID3) PrettyPrint() {
 	w := os.Stdout
-	text := `All ID3v1 information:
-Artist: {{.V1.Artist}}
-Title: {{.V1.Title}}
-Album: {{.V1.Album}}
-Year: {{.V1.Year}}
-Comment: {{.V1.Comment}}
-Track: {{.V1.Track}}
-Genre ID: {{.V1.Genre}}
+	text := `Artist: {{.GetArtist}}
+Title: {{.GetTitle}}
+Album: {{.GetAlbum}}
+Year: {{.GetReleaseYear}}
+Comment: {{.GetComment}}
+Track: {{.GetTrackNumber}}
+Genre: {{.GetGenre}}
 
 All ID3v2 information:{{range .V2.Items}}
  {{.GetName}} {{.GetExplain | printf "%-40s"}} {{.GetLength | printf "%-7s"}} "{{.DisplayContent}}"{{end}}
