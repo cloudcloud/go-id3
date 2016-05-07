@@ -1,24 +1,24 @@
 package main
 
-import "github.com/cloudcloud/go-id3/id3"
+import (
+	"fmt"
+
+	"github.com/cloudcloud/go-id3/file"
+)
 
 var readCmd = &Command{
-	UsageLine: "read [filename]",
+	UsageLine: "read [options] [filename]",
 	Short:     "Display information from a specific file",
 	Long: `
 Read comprehensive information about a specific file.
 
 Options:
-	
+
 
 For example:
 	go-id3 read /var/filename.mp3
 `,
 }
-
-var (
-	filename string
-)
 
 func init() {
 	readCmd.Run = readRun
@@ -29,16 +29,15 @@ func readRun(args []string) {
 		errorf("No filename provided")
 	}
 
-	filename = args[0]
-	i, err := id3.New(filename)
-	if err != nil {
-		errorf("File does not exist")
-	}
+	defer func() {
+		if r := recover(); r != nil {
+			// need to do some better handling of big problems
+			fmt.Println("Encountered a panic, please resolve:\n\t", r)
+		}
+	}()
 
-	if isDebug {
-		i.SetDebug()
-	}
+	f := &file.File{Filename: args[0], Debug: isDebug}
+	defer f.CleanUp()
 
-	i.Process()
-	i.PrettyPrint()
+	fmt.Println(f.Process().PrettyPrint())
 }

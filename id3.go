@@ -25,8 +25,8 @@ var (
 	commands = []*Command{
 		readCmd,
 	}
-
-	isDebug = false
+	isDebug   bool
+	outFormat = "json"
 )
 
 const (
@@ -39,16 +39,18 @@ Use "go-id3 help [command]" for more information.
 
 Options:
  -d		Enable debug mode
+ -f		Output format
 `
 	helpTemplate = `usage: go-id3 {{.UsageLine}}
 {{.Long}}
 `
-	defaultDebug = false
+	defaultDebug  = false
+	defaultFormat = "json"
 )
 
 func init() {
 	flag.BoolVar(&isDebug, "d", defaultDebug, "Provide debugging information (shorthand)")
-
+	flag.StringVar(&outFormat, "f", defaultFormat, "Format for output response (shorthand)")
 	flag.Usage = func() { usage(1) }
 }
 
@@ -56,13 +58,13 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 
-	if len(args) < 1 || args[0] == "help" {
+	if len(args) < 1 || flag.Arg(0) == "help" {
 		if len(args) == 1 {
 			usage(0)
 		}
 		if len(args) > 1 {
 			for _, cmd := range commands {
-				if cmd.Name() == args[1] {
+				if cmd.Name() == flag.Arg(1) {
 					tmpl(os.Stdout, helpTemplate, cmd)
 					return
 				}
@@ -74,20 +76,20 @@ func main() {
 	defer func() {
 		if err := recover(); err != nil {
 			if _, ok := err.(LoggedError); !ok {
-				panic(err)
+				fmt.Printf("Have error: [%s]\n\n", err)
 			}
 			os.Exit(1)
 		}
 	}()
 
 	for _, cmd := range commands {
-		if cmd.Name() == args[0] {
+		if cmd.Name() == flag.Arg(0) {
 			cmd.Run(args[1:])
-			return
+			os.Exit(0)
 		}
 	}
 
-	errorf("unknown command [%q]\nRun 'go-id3 help' for usage.\n", args[0])
+	errorf("unknown command [%q]\nRun 'go-id3 help' for usage.\n", flag.Arg(0))
 }
 
 func errorf(format string, args ...interface{}) {
@@ -96,7 +98,7 @@ func errorf(format string, args ...interface{}) {
 	}
 
 	fmt.Fprintf(os.Stderr, format, args...)
-	panic(LoggedError{})
+	os.Exit(1)
 }
 
 func usage(exit int) {
