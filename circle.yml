@@ -1,0 +1,48 @@
+machine:
+  timezone:
+    Australia/Sydney
+  environment:
+    CIRCLE_ENV: test
+    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+    GOROOT: "/usr/local/go"
+    GOPATH: "/usr/local/go/"
+    USAGE_PATH: "$GOPATH/src/$IMPORT_PATH"
+
+checkout:
+  post:
+    - sudo chown -R `whoami`:`whoami` "$GOPATH"
+    - git submodule sync
+    - git submodule update --init
+
+dependencies:
+  pre:
+    - go get -u github.com/axw/gocov/gocov
+    - go get -u gopkg.in/matm/v1/gocov-html
+    - go get -u github.com/kardianos/govendor
+  override:
+    - mkdir -p "$USAGE_PATH"
+    - rsync -azC --delete ./ "$USAGE_PATH"
+
+test:
+  pre:
+    - go install "$IMPORT_PATH"
+    - go vet .
+  override:
+    - gocov test $(go list "$IMPORT_PATH/..." | grep -v /vendor/) > "$CIRCLE_ARTIFACTS/coverage.json"
+    - gocov-html "$CIRCLE_ARTIFACTS/coverage.json" > "$CIRCLE_ARTIFACTS/coverage.html"
+    - cd "$USAGE_PATH" && go test -covermode=count -coverprofile="$CIRCLE_ARTIFACTS/coverage.out" -coverpkg "./..."
+  post:
+    - mv `which go-id3` "$CIRCLE_ARTIFACTS/go-id3"
+
+general:
+  artifacts:
+    - "$CIRCLE_ARTIFACTS/coverage.json"
+    - "$CIRCLE_ARTIFACTS/coverage.html"
+    - "$CIRCLE_ARTIFACTS/go-id3"
+    - "$CIRCLE_ARTIFACTS/coverage.out"
+
+deployment:
+  codecov:
+    branch: /.*/
+    commands:
+      - bash <(curl -s https://codecov.io/bash) -f $CIRCLE_ARTIFACTS/coverage.out
