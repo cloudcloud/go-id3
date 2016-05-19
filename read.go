@@ -2,18 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/cloudcloud/go-id3/file"
 )
 
 var readCmd = &Command{
-	UsageLine: "read [options] [filename]",
+	UsageLine: "read [filename]",
 	Short:     "Display information from a specific file",
 	Long: `
 Read comprehensive information about a specific file.
-
-Options:
-
 
 For example:
 	go-id3 read /var/filename.mp3
@@ -21,23 +20,24 @@ For example:
 }
 
 func init() {
-	readCmd.Run = readRun
+	readCmd.Run = readProcess
 }
 
-func readRun(args []string) {
+func readProcess(args []string, o io.Writer) {
 	if len(args) < 1 {
-		errorf("No filename provided")
+		fmt.Fprintf(o, "No filename provided")
+		return
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-			// need to do some better handling of big problems
-			fmt.Println("Encountered a panic, please resolve:\n\t", r)
-		}
-	}()
+	defer catcher(os.Stderr)
 
 	f := &file.File{Filename: args[0], Debug: isDebug}
-	defer f.CleanUp()
+	handle, err := os.Open(f.Filename)
+	if err != nil {
+		fmt.Fprintf(o, "Unable to open the file [%s]", f.Filename)
+		return
+	}
+	defer handle.Close()
 
-	fmt.Println(f.Process().PrettyPrint())
+	f.Process(handle).PrettyPrint(o, outFormat)
 }

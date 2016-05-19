@@ -1,6 +1,9 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // COMM contains the processing house for Comments
 type COMM struct {
@@ -11,31 +14,9 @@ type COMM struct {
 	Comment            string `json:"comment"`
 }
 
-// Init will provide the initial values
-func (c *COMM) Init(n, d string, v int) {
-	c.Name = n
-	c.Description = d
-	c.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (c *COMM) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (c *COMM) GetExplain() string {
-	return c.Description
-}
-
-// GetLength will provide the length
-func (c *COMM) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (c *COMM) GetName() string {
-	return c.Name
+	return fmt.Sprintf("Title: %s\nComment: %s", c.ContentDescription, c.Comment)
 }
 
 // ProcessData will handle the acquisition of all data

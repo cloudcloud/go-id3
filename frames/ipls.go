@@ -1,6 +1,10 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"sort"
+)
 
 // IPLS provides the involved people list frame
 type IPLS struct {
@@ -9,30 +13,22 @@ type IPLS struct {
 	People map[string]string `json:"people"`
 }
 
-// Init will provide the initial values
-func (i *IPLS) Init(n, d string, v int) {
-	i.Name = n
-	i.Description = d
-	i.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (i *IPLS) DisplayContent() string {
-	return ""
+	out := fmt.Sprintf("Involved People:\n")
+	for k, v := range i.People {
+		out = fmt.Sprintf("%s\t%s: %s\n", out, k, v)
+	}
+
+	return out
 }
 
-// GetExplain will provide output formatting briefly
-func (i *IPLS) GetExplain() string {
-	return i.Description
-}
-
-// GetLength will provide the length
-func (i *IPLS) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
+// GetName includes deprecation notice for v2.4.*
 func (i *IPLS) GetName() string {
+	if i.Version == Version4 {
+		return fmt.Sprintf("%s (deprecated)", i.Name)
+	}
+
 	return i.Name
 }
 
@@ -41,38 +37,60 @@ func (i *IPLS) ProcessData(s int, d []byte) IFrame {
 	i.Size = s
 	i.Data = d
 
-	// text encoding is a single byte, 0 for latin, 1 for unicode
-	if len(d) > 2 {
-		enc := d[0]
-		d = d[1:]
+	i.People = map[string]string{}
+	k := []string{}
+	t := map[string]string{}
 
-		// loop through lines, should be even numbered
-		for len(d) > 2 {
-			if enc == '\x00' {
-				idx := bytes.IndexByte(d, '\x00')
-				name := GetStr(d[:idx])
-				d = d[:idx+LengthStandard]
+	if d[0] == '\x01' {
+		i.Utf16 = true
+	}
+	d = d[1:]
 
-				idx = bytes.IndexByte(d, '\x00')
-				if idx == -1 {
-					break
-				}
-				i.People[name] = GetStr(d[:idx])
-				d = d[idx+LengthStandard:]
-			} else if enc == '\x01' {
-				i.Utf16 = true
+	// loop through lines, should be even numbered
+	for len(d) > 2 {
+		if !i.Utf16 {
+			idx := bytes.IndexByte(d, '\x00')
+			name := GetStr(d[:idx])
+			d = d[idx+LengthStandard:]
 
-				idx := bytes.Index(d, []byte{'\x00', '\x00'})
-				name := GetUnicodeStr(d[:idx])
-				d = d[:idx+LengthUnicode]
+			idx = bytes.IndexByte(d, '\x00')
+			if idx == -1 {
+				value := GetStr(d)
+				k = append(k, name)
+				t[name] = value
 
-				idx = bytes.Index(d, []byte{'\x00', '\x00'})
-				if idx == -1 {
-					break
-				}
-				i.People[name] = GetUnicodeStr(d[:idx+LengthUnicode])
-				d = d[:idx+LengthUnicode]
+				break
 			}
+			value := GetStr(d[:idx])
+			k = append(k, name)
+			t[name] = value
+
+			d = d[idx+LengthStandard:]
+		} else {
+			idx := bytes.Index(d, []byte{'\x00', '\x00'})
+			name := GetUnicodeStr(d[:idx])
+			d = d[idx+LengthUnicode:]
+
+			idx = bytes.Index(d, []byte{'\x00', '\x00'})
+			if idx == -1 {
+				value := GetUnicodeStr(d)
+				k = append(k, name)
+				t[name] = value
+
+				break
+			}
+			value := GetUnicodeStr(d[:idx])
+			k = append(k, name)
+			t[name] = value
+
+			d = d[idx+LengthUnicode:]
+		}
+	}
+
+	sort.Strings(k)
+	for _, x := range k {
+		if len(x) > 0 {
+			i.People[x] = t[x]
 		}
 	}
 

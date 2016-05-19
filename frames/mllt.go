@@ -1,5 +1,7 @@
 package frames
 
+import "fmt"
+
 // MLLT defines the mpeg location lookup table
 type MLLT struct {
 	Frame
@@ -12,31 +14,12 @@ type MLLT struct {
 	Deviations          []byte `json:"deviations"`
 }
 
-// Init will provide the initial values
-func (m *MLLT) Init(n, d string, v int) {
-	m.Name = n
-	m.Description = d
-	m.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (m *MLLT) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (m *MLLT) GetExplain() string {
-	return m.Description
-}
-
-// GetLength will provide the length
-func (m *MLLT) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (m *MLLT) GetName() string {
-	return m.Name
+	return fmt.Sprintf("MPEG Lookup\n\tFrames: %d\n\tBytes: %d\n\tMilliseconds: %d\n",
+		m.FramesBetween,
+		m.BytesBetween,
+		m.MillisecondsBetween)
 }
 
 // ProcessData will handle the acquisition of all data

@@ -1,35 +1,30 @@
 package frames
 
+import "fmt"
+
 // TEXT houses anything just for a TEXT frame
 type TEXT struct {
 	Frame
 }
 
-// Init will provide the initial values
-func (t *TEXT) Init(n, d string, s int) {
-	t.Name = n
-	t.Description = d
-	t.Size = s
-}
-
 // DisplayContent will comprehensively display known information
 func (t *TEXT) DisplayContent() string {
-	return ""
+	return fmt.Sprintf("[%s - %d] (%s) %s\n", t.Name, t.Size, t.Description, t.Cleaned)
 }
 
-// GetExplain will provide output formatting briefly
-func (t *TEXT) GetExplain() string {
-	return t.Description
-}
-
-// GetLength will provide the length
-func (t *TEXT) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
+// GetName will add deprecated notes where appropriate based on version
 func (t *TEXT) GetName() string {
-	return t.Name
+	out := t.Name
+	if t.Version == Version4 && (t.Name == "TDAT" ||
+		t.Name == "TIME" ||
+		t.Name == "TORY" ||
+		t.Name == "TRDA" ||
+		t.Name == "TSIZ" ||
+		t.Name == "TYER") {
+		out += " (deprecated)"
+	}
+
+	return out
 }
 
 // ProcessData will handle the acquisition of all data
@@ -38,15 +33,15 @@ func (t *TEXT) ProcessData(s int, d []byte) IFrame {
 	t.Data = d
 
 	// text encoding is a single byte, 0 for latin, 1 for unicode
-	if len(d) > 2 {
-		enc := d[0]
+	if len(d) > 1 {
+		if d[0] == '\x01' {
+			t.Utf16 = true
+		}
 		d = d[1:]
 
-		if enc == '\x00' {
+		if !t.Utf16 {
 			t.Frame.Cleaned = GetStr(d)
-		} else if enc == '\x01' {
-			t.Utf16 = true
-
+		} else {
 			t.Frame.Cleaned = GetUnicodeStr(d)
 		}
 	}

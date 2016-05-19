@@ -2,6 +2,7 @@ package file
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/cloudcloud/go-id3/frames"
@@ -21,7 +22,7 @@ type V2 struct {
 	Footer         bool            `json:"footer"`
 
 	Debug  bool `json:"-"`
-	file   *os.File
+	file   frames.FrameFile
 	offset int
 }
 
@@ -42,9 +43,10 @@ const (
 )
 
 // Parse will trawl a file handle for frames
-func (f *V2) Parse(h *os.File) {
+func (f *V2) Parse(h frames.FrameFile) error {
 	f.file = h
 	offset := v2HeaderOffset
+	f.Frames = []frames.IFrame{}
 
 	// have a stream, will read bytes from it
 	buf := make([]byte, v2HeaderLength)
@@ -52,7 +54,7 @@ func (f *V2) Parse(h *os.File) {
 	f.file.Read(buf)
 
 	if string(buf[:offset]) != v2HeaderInit {
-		panic("Not a valid ID3 Version 2 tag found")
+		return fmt.Errorf("Not a valid ID3 Version 2 tag found")
 	}
 
 	f.Major = frames.GetDirectInt(buf[offset]) // first index for major version
@@ -79,12 +81,8 @@ func (f *V2) Parse(h *os.File) {
 		_ = extended
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-			// silently continue through... perhaps debug
-			fmt.Printf("Caught a panic [%s]\n\n", r)
-		}
-	}()
+	// wait for a panic
+	defer f.catcher(os.Stderr)
 
 	// trawl frames time
 	for {
@@ -102,11 +100,11 @@ func (f *V2) Parse(h *os.File) {
 			}
 
 			resp, ok = frames.Version23Frames[frames.GetStr(frameName)]
+			tmpDetail = f.nextBytes(v2HeaderLength - v2NewByteLen)
 			if !ok {
 				continue
 			}
 
-			tmpDetail = f.nextBytes(v2HeaderLength - v2NewByteLen)
 			tmpSize = frames.GetSize(tmpDetail[:v2NewByteLen], bitwiseEighthShifter)
 		case frames.Version4: // process version 4 frame
 			frameName = f.nextBytes(v2NewByteLen)
@@ -115,11 +113,11 @@ func (f *V2) Parse(h *os.File) {
 			}
 
 			resp, ok = frames.Version24Frames[frames.GetStr(frameName)]
+			tmpDetail = f.nextBytes(v2HeaderLength - v2NewByteLen)
 			if !ok {
 				continue
 			}
 
-			tmpDetail = f.nextBytes(v2HeaderLength - v2NewByteLen)
 			tmpSize = frames.GetSize(tmpDetail[:v2NewByteLen], bitwiseSeventhShifter)
 		case frames.Version2: // process version 2 frame
 			frameName = f.nextBytes(v2OrigByteLen)
@@ -133,9 +131,9 @@ func (f *V2) Parse(h *os.File) {
 			}
 
 			tmpDetail = f.nextBytes(v2OrigByteLen)
-			tmpSize = frames.GetSize(tmpDetail, bitwiseEighthShifter)
+			tmpSize = frames.GetSize(tmpDetail, bitwiseSeventhShifter)
 		default:
-			panic(fmt.Sprintf("Frame version not supported v2.%d.%d", f.Major, f.Min))
+			return fmt.Errorf("Frame version not supported v2.%d.%d", f.Major, f.Min)
 		}
 
 		// if no frame, nothing to soak up before breaking
@@ -143,18 +141,59 @@ func (f *V2) Parse(h *os.File) {
 			break
 		}
 
-		// soak up in case of bad frame loading but still frame bytes
 		tmpFrame := f.nextBytes(tmpSize)
-		if resp == nil {
-			fmt.Println("Invalid frame loaded")
-			break
-		}
-
 		frame = resp()
 		if f.Debug {
 			fmt.Printf("Pushing in [%s]\n", frame.GetName())
 		}
 		f.Frames = append(f.Frames, frame.ProcessData(tmpSize, tmpFrame))
+	}
+
+	return nil
+}
+
+// GetFrame will provide a specific Frame if it exists
+func (f *V2) GetFrame(n string) frames.IFrame {
+	for _, v := range f.Frames {
+		if v.GetName() == n {
+			return v
+		}
+	}
+
+	return nil
+}
+
+// GetArtist will retrieve the ideal artist for use
+func (f *V2) GetArtist() string {
+	b := ""
+	if a := f.GetFrame("TPE1"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TPE2"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TPE3"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TPE4"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	}
+
+	return b
+}
+
+// GetAlbum will determine and give the ideal album
+func (f *V2) GetAlbum() string {
+	b := ""
+	if a := f.GetFrame("TALB"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TOAL"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	}
+
+	return b
+}
+
+func (f *V2) catcher(o io.Writer) {
+	if r := recover(); r != nil {
+		fmt.Fprintf(o, "Stumbled upon a panic(), %s.\n", r)
 	}
 }
 

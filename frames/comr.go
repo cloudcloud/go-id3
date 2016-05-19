@@ -1,6 +1,9 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // COMR contains commerical details
 type COMR struct {
@@ -16,31 +19,15 @@ type COMR struct {
 	Logo           []byte `json:"logo"`
 }
 
-// Init will provide the initial values
-func (c *COMR) Init(n, d string, v int) {
-	c.Name = n
-	c.Description = d
-	c.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (c *COMR) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (c *COMR) GetExplain() string {
-	return ""
-}
-
-// GetLength will provide the length of frame
-func (c *COMR) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (c *COMR) GetName() string {
-	return c.Name
+	return fmt.Sprintf(`Price:           %s
+Valid Until:     %s
+Contact URL:     %s
+Seller Name:     %s
+Commercial Name: %s
+Mime Type:       %s`,
+		c.Price, c.ValidUntil, c.ContactURL, c.SellerName, c.CommercialName, c.PictureMime)
 }
 
 // ProcessData will parse the frame bytes
@@ -50,13 +37,14 @@ func (c *COMR) ProcessData(s int, d []byte) IFrame {
 
 	// text encoding is a single byte, 0 for latin, 1 for unicode
 	if len(d) > 2 {
-		// for the unicode bit
-		enc := d[0]
+		if d[0] == '\x01' {
+			c.Utf16 = true
+		}
 
 		// pricing up first, null term
 		idx := bytes.IndexByte(d[1:], '\x00')
-		c.Price = GetStr(d[:idx])
-		d = d[idx+1:]
+		c.Price = GetStr(d[1:idx])
+		d = d[idx+2:]
 
 		// valid until date is 8 bytes
 		c.ValidUntil = GetStr(d[:8]) // date: YYYYMMDD
@@ -71,7 +59,7 @@ func (c *COMR) ProcessData(s int, d []byte) IFrame {
 		d = d[idx+2:]
 
 		// seller name, null term
-		if enc == '\x00' {
+		if !c.Utf16 {
 			idx = bytes.IndexByte(d, '\x00')
 			c.SellerName = GetStr(d[:idx])
 			d = d[idx+1:]
@@ -79,9 +67,7 @@ func (c *COMR) ProcessData(s int, d []byte) IFrame {
 			idx = bytes.IndexByte(d, '\x00')
 			c.CommercialName = GetStr(d[:idx])
 			d = d[idx+1:]
-		} else if enc == '\x01' {
-			c.Utf16 = true
-
+		} else {
 			idx = bytes.Index(d, []byte{'\x00', '\x00'})
 			c.SellerName = GetUnicodeStr(d[:idx])
 			d = d[idx+2:]

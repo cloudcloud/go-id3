@@ -1,5 +1,7 @@
 package frames
 
+import "fmt"
+
 // ETCO provides timing codes for events in the file
 type ETCO struct {
 	Frame
@@ -8,31 +10,9 @@ type ETCO struct {
 	Codes  []byte `json:"codes"`
 }
 
-// Init will provide the initial values
-func (e *ETCO) Init(n, d string, v int) {
-	e.Name = n
-	e.Description = d
-	e.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (e *ETCO) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (e *ETCO) GetExplain() string {
-	return e.Description
-}
-
-// GetLength will provide the length
-func (e *ETCO) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (e *ETCO) GetName() string {
-	return e.Name
+	return fmt.Sprintf("Format: %d\nCode Count: %d", GetDirectInt(e.Format), len(e.Codes)/5)
 }
 
 // ProcessData will handle the acquisition of all data

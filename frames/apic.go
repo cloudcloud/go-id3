@@ -1,42 +1,47 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // APIC will house any specific APIC frame data
 type APIC struct {
 	Frame
 
 	MimeType    string `json:"mime_type"`
-	PictureType int    `json:"picture_type"`
+	PictureType string `json:"picture_type"`
 	Image       []byte `json:"image"`
 	Title       string `json:"title"`
 }
 
-// Init will provide the initial values
-func (a *APIC) Init(n, d string, v int) {
-	a.Name = n
-	a.Description = d
-	a.Version = v
+var picList = map[int]string{
+	0:  "Other",
+	1:  "32x32 pixels 'file icon' (PNG only)",
+	2:  "Other file icon",
+	3:  "Cover (front)",
+	4:  "Cover (back)",
+	5:  "Leaflet page",
+	6:  "Media (e.g. lable side of CD)",
+	7:  "Lead artist/lead performer/soloist",
+	8:  "Artist/performer",
+	9:  "Conductor",
+	10: "Band/Orchestra",
+	11: "Composer",
+	12: "Lyricist/text writer",
+	13: "Recording Location",
+	14: "During recording",
+	15: "During performance",
+	16: "Movie/video screen capture",
+	17: "A bright coloured fish",
+	18: "Illustration",
+	19: "Band/artist logotype",
+	20: "Publisher/Studio logotype",
 }
 
 // DisplayContent will comprehensively display known information for APIC
 func (a *APIC) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly for APIC
-func (a *APIC) GetExplain() string {
-	return ""
-}
-
-// GetLength will provide the length of the APIC frame
-func (a *APIC) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name of APIC
-func (a *APIC) GetName() string {
-	return "APIC"
+	return fmt.Sprintf("Image (%s, %s, %db) %s\n", a.MimeType, a.PictureType, len(a.Image), a.Title)
 }
 
 // ProcessData grabs the meta and binary detail for the image
@@ -45,7 +50,9 @@ func (a *APIC) ProcessData(s int, d []byte) IFrame {
 	a.Data = d
 
 	// encoding is first, 1 is unicode
-	enc := d[0]
+	if d[0] == '\x01' {
+		a.Utf16 = true
+	}
 	d = d[1:]
 
 	// mime type next, null term
@@ -53,19 +60,21 @@ func (a *APIC) ProcessData(s int, d []byte) IFrame {
 	a.MimeType = GetStr(d[:idx])
 
 	// picture type
-	a.PictureType = GetDirectInt(d[idx+1])
+	pic := GetSize([]byte{d[idx+1]}, 8)
+	a.PictureType = picList[pic]
+	if len(a.PictureType) < 2 {
+		a.PictureType = picList[0]
+	}
 	d = d[idx+2:]
 
 	// image description, null term
-	if enc == '\x00' {
+	if !a.Utf16 {
 		idx = bytes.IndexByte(d, '\x00')
 		a.Title = GetStr(d[:idx])
 
 		// image is next now
 		a.Image = d[idx+1:]
-	} else if enc == '\x01' {
-		a.Utf16 = true
-
+	} else {
 		idx = bytes.Index(d, []byte{'\x00', '\x00'})
 		a.Title = GetUnicodeStr(d[:idx])
 

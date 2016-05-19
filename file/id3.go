@@ -4,7 +4,10 @@ package file
 
 import (
 	"encoding/json"
-	"os"
+	"fmt"
+	"io"
+
+	"github.com/cloudcloud/go-id3/frames"
 )
 
 // File provides the data container for an individual File
@@ -14,7 +17,12 @@ type File struct {
 	V2       *V2    `json:"id3v2"`
 	Debug    bool   `json:"-"`
 
-	fileHandle *os.File
+	fileHandle frames.FrameFile
+}
+
+// Version is an interface for individual version implementations
+type Version interface {
+	Parse(frames.FrameFile) error
 }
 
 const (
@@ -23,15 +31,11 @@ const (
 )
 
 // Process will begin the opening and loading of File content
-func (f *File) Process() *File {
-	var err error
-	f.fileHandle, err = os.Open(f.Filename)
-	if err != nil {
-		panic(err)
-	}
+func (f *File) Process(h frames.FrameFile) *File {
+	f.fileHandle = h
 
 	// run through v1
-	f.V1 = &V1{}
+	f.V1 = &V1{Debug: f.Debug}
 	f.V1.Parse(f.fileHandle)
 
 	// run through v2
@@ -41,18 +45,39 @@ func (f *File) Process() *File {
 	return f
 }
 
-// CleanUp will run-through any post-processing requirements
-func (f *File) CleanUp() {
-	f.fileHandle.Close()
-}
-
 // PrettyPrint draws a nice representation of the file for the command line
-func (f *File) PrettyPrint() string {
-	a, _ := json.Marshal(f)
-	return string(a)
+func (f *File) PrettyPrint(o io.Writer, format string) {
+	switch format {
+	case "text":
+		fmt.Fprintf(o, "Artist: %s\n", f.GetArtist())
+		fmt.Fprintf(o, "Album:  %s\n", f.GetAlbum())
+
+	case "yaml":
+	case "raw":
+	case "json":
+		fallthrough
+	default:
+		e := json.NewEncoder(o)
+		e.Encode(f)
+	}
 }
 
 // GetArtist will determine the ideal Artist string for use
 func (f *File) GetArtist() string {
-	return ""
+	a := f.V2.GetArtist()
+	if len(a) < 1 {
+		a = f.V1.Artist
+	}
+
+	return a
+}
+
+// GetAlbum will determine the ideal Album string for use
+func (f *File) GetAlbum() string {
+	a := f.V2.GetAlbum()
+	if len(a) < 1 {
+		a = f.V1.Album
+	}
+
+	return a
 }
