@@ -12,7 +12,7 @@ import (
 // Command defines the attributes and usage processing for a specific command
 // passed to the binary for execution.
 type Command struct {
-	Run                    func(args []string)
+	Run                    func(args []string, o io.Writer)
 	UsageLine, Short, Long string
 }
 
@@ -26,7 +26,7 @@ var (
 		readCmd,
 	}
 	isDebug   bool
-	outFormat = "json"
+	outFormat = "text"
 )
 
 const (
@@ -39,7 +39,11 @@ Use "go-id3 help [command]" for more information.
 
 Options:
  -d		Enable debug mode
- -f		Output format
+ -f		Output format; one of the following (default is json):
+	json
+	text
+	yaml
+	raw
 `
 	helpTemplate = `usage: go-id3 {{.UsageLine}}
 {{.Long}}
@@ -84,7 +88,7 @@ func main() {
 
 	for _, cmd := range commands {
 		if cmd.Name() == flag.Arg(0) {
-			cmd.Run(args[1:])
+			cmd.Run(args[1:], os.Stdout)
 			os.Exit(0)
 		}
 	}
@@ -98,7 +102,6 @@ func errorf(format string, args ...interface{}) {
 	}
 
 	fmt.Fprintf(os.Stderr, format, args...)
-	os.Exit(1)
 }
 
 func usage(exit int) {
@@ -114,9 +117,8 @@ func tmpl(w io.Writer, text string, data interface{}) {
 	}
 }
 
-// Name provides a way to display the name of a command. As each
-// command is stored within the structure nameless, this function
-// will process what exists to determine the name.
+// Name provides a way to display the name of a command. As each command is stored within the
+// structure nameless, this function will process what exists to determine the name.
 func (cmd *Command) Name() string {
 	name := cmd.UsageLine
 	i := strings.Index(name, " ")
@@ -124,4 +126,10 @@ func (cmd *Command) Name() string {
 		name = name[:i]
 	}
 	return name
+}
+
+func catcher(o io.Writer) {
+	if r := recover(); r != nil {
+		fmt.Fprintf(o, "Encountered panic(), %s.\n", r)
+	}
 }

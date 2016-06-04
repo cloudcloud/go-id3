@@ -1,6 +1,9 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // UFID provides descriptor of uniqueness for the file
 type UFID struct {
@@ -10,31 +13,9 @@ type UFID struct {
 	Identifier []byte `json:"identifier"`
 }
 
-// Init will provide the initial values
-func (u *UFID) Init(n, d string, v int) {
-	u.Name = n
-	u.Description = d
-	u.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (u *UFID) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (u *UFID) GetExplain() string {
-	return u.Description
-}
-
-// GetLength will provide the length
-func (u *UFID) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (u *UFID) GetName() string {
-	return u.Name
+	return fmt.Sprintf("Owner: (%s) Identifier: (%x)\n", u.Owner, u.Identifier)
 }
 
 // ProcessData will handle the acquisition of all data

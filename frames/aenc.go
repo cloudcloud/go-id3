@@ -12,33 +12,17 @@ type AENC struct {
 	Contact       string `json:"contact"`
 	PreviewStart  []byte `json:"preview_start"`
 	PreviewLength []byte `json:"preview_length"`
-}
-
-// Init will provide the initial values
-func (a *AENC) Init(n, d string, v int) {
-	a.Name = n
-	a.Description = d
-	a.Version = v
+	Encryption    []byte `json:"encryption"`
 }
 
 // DisplayContent will comprehensively display known information
 func (a *AENC) DisplayContent() string {
-	return ""
-}
+	r := fmt.Sprintf("Contact: %s\n", a.Contact)
+	r += fmt.Sprintf("PreviewStart: %#v\n", a.PreviewStart)
+	r += fmt.Sprintf("PreviewLength: %#v\n", a.PreviewLength)
+	r += fmt.Sprintf("Encryption: %#v\n", a.Encryption)
 
-// GetExplain will provide output formatting briefly
-func (a *AENC) GetExplain() string {
-	return ""
-}
-
-// GetLength will provide the length of frame
-func (a *AENC) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name of AENC
-func (a *AENC) GetName() string {
-	return a.Name
+	return r
 }
 
 // ProcessData will accept the incoming chunk and process it for the frame specifically
@@ -54,7 +38,9 @@ func (a *AENC) ProcessData(l int, b []byte) IFrame {
 	}
 
 	a.Contact = GetStr(b[:term])
-	a.Frame.Cleaned = GetStr(b[term:])
+	a.PreviewStart = b[term+1 : term+3]
+	a.PreviewLength = b[term+3 : term+5]
+	a.Encryption = b[term+5:]
 
 	fmt.Println("AENC is untested and possibly wrong")
 

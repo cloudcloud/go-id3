@@ -1,6 +1,9 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // TXXX provides the user string from the file
 type TXXX struct {
@@ -10,31 +13,9 @@ type TXXX struct {
 	Value string `json:"value"`
 }
 
-// Init will provide the initial values
-func (t *TXXX) Init(n, d string, v int) {
-	t.Name = n
-	t.Description = d
-	t.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (t *TXXX) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (t *TXXX) GetExplain() string {
-	return t.Description
-}
-
-// GetLength will provide the length
-func (t *TXXX) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (t *TXXX) GetName() string {
-	return t.Name
+	return fmt.Sprintf("User text (%s):(%s)\n", t.Type, t.Value)
 }
 
 // ProcessData will handle the acquisition of all data

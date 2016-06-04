@@ -1,34 +1,27 @@
 package frames
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // EQUA contains equalisation settings for the file
 type EQUA struct {
 	Frame
 
-	Adjustment byte `json:"adjustment"`
+	Adjustment int `json:"adjustment"`
+	Steps      []*step
 }
 
-// Init will provide the initial values
-func (e *EQUA) Init(n, d string, v int) {
-	e.Name = n
-	e.Description = d
-	e.Version = v
+type step struct {
+	Increment  bool `json:"increment"`
+	Frequency  int  `json:"frequency"`
+	Adjustment int  `json:"adjustment"`
 }
 
 // DisplayContent will comprehensively display known information
 func (e *EQUA) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (e *EQUA) GetExplain() string {
-	return ""
-}
-
-// GetLength will provide the length of frame
-func (e *EQUA) GetLength() string {
-	return ""
+	return fmt.Sprintf("Adjustment: %d\nSteps: %d", e.Adjustment, len(e.Steps))
 }
 
 // GetName will provide the Name of EQUA
@@ -44,11 +37,22 @@ func (e *EQUA) GetName() string {
 func (e *EQUA) ProcessData(s int, d []byte) IFrame {
 	e.Size = s
 
-	e.Data = d[1:]
-	e.Adjustment = d[0]
+	e.Adjustment = GetDirectInt(d[0])
+	d = d[1:]
+	e.Data = d
 
-	// Data contains all frequency sets in groups 2 or 3 bytes
-	fmt.Println("Unimplemented: EQUA frame")
+	extraBytes := math.Ceil(float64(e.Adjustment / 8))
+	chunked := int(2 + extraBytes)
+
+	for len(d) >= chunked {
+		e.Steps = append(e.Steps, &step{
+			Increment:  GetBoolBit(d[0], 8),
+			Frequency:  GetBitInt(d[0], false, 7) + GetBitInt(d[1], false, 8),
+			Adjustment: GetInt(d[2:int(extraBytes)]),
+		})
+
+		d = d[chunked:]
+	}
 
 	return e
 }

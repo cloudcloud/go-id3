@@ -1,7 +1,7 @@
 package file
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/cloudcloud/go-id3/frames"
 )
@@ -20,32 +20,43 @@ type V1 struct {
 }
 
 const (
-	v1TagSize    = 128 // full number of bytes
-	v1TagStart   = 3   // offset where tag content begins
-	v1TitleEnd   = 33  // offset for track title
-	v1ArtistEnd  = 63  // offset for artist name
-	v1AlbumEnd   = 93  // offset for album name
-	v1YearEnd    = 97  // offset where year completes
-	v1CommentEnd = 125 // offset where comment completes
+	v1TagSize     = 128 // full number of bytes
+	v1TagStart    = 3   // offset where tag content begins
+	v1TitleEnd    = 33  // offset for track title
+	v1ArtistEnd   = 63  // offset for artist name
+	v1AlbumEnd    = 93  // offset for album name
+	v1YearEnd     = 97  // offset where year completes
+	v1CommentEnd  = 125 // offset where comment completes
+	v1TagLocation = 2   // direction from which content is read
+	v1StrLength   = 30  // base string length
+	v1ComLength   = 28  // base comment length
 )
 
 // Parse completes the actual processing of the file
 // and extracts the tag information.
-func (i *V1) Parse(h *os.File) {
+func (i *V1) Parse(h frames.FrameFile) error {
 	b := make([]byte, v1TagSize)
-	h.Seek(int64(v1TagStart), -v1TagStart)
+	h.Seek(-int64(v1TagSize), v1TagLocation)
 	h.Read(b)
 
 	if frames.GetStr(b[0:v1TagStart]) != "TAG" {
-		return
+		return fmt.Errorf("No id3v1, %#v", b[0:v1TagStart])
 	}
+	b = b[v1TagStart:]
 
-	i.Title = frames.GetStr(b[v1TagStart:v1TitleEnd])
-	i.Artist = frames.GetStr(b[v1TitleEnd:v1ArtistEnd])
-	i.Album = frames.GetStr(b[v1ArtistEnd:v1AlbumEnd])
-	i.Year = frames.GetInt(b[v1AlbumEnd:v1YearEnd])
-	i.Comment = frames.GetStr(b[v1YearEnd:v1CommentEnd])
+	i.Title = frames.GetStr(b[:v1StrLength])
+	b = b[v1StrLength:]
+	i.Artist = frames.GetStr(b[:v1StrLength])
+	b = b[v1StrLength:]
+	i.Album = frames.GetStr(b[:v1StrLength])
+	b = b[v1StrLength:]
+	i.Year = frames.GetInt(b[:4])
+	b = b[4:]
+	i.Comment = frames.GetStr(b[:v1ComLength])
+	b = b[v1ComLength:]
 
-	i.Track = frames.GetInt([]byte{b[v1CommentEnd+1]})
-	i.Genre = frames.GetInt([]byte{b[v1CommentEnd+2]})
+	i.Track = frames.GetInt(b[0:2])
+	i.Genre = frames.GetInt([]byte{b[2]})
+
+	return nil
 }

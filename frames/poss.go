@@ -1,38 +1,20 @@
 package frames
 
+import "fmt"
+
 // POSS provides a frame for position synchronisation
 type POSS struct {
 	Frame
 
-	Format   byte   `json:"format"`
+	Format   string `json:"format"`
 	Position []byte `json:"position"`
-}
-
-// Init will provide the initial values
-func (p *POSS) Init(n, d string, v int) {
-	p.Name = n
-	p.Description = d
-	p.Version = v
 }
 
 // DisplayContent will comprehensively display known information
 func (p *POSS) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (p *POSS) GetExplain() string {
-	return ""
-}
-
-// GetLength will provide the length of frame
-func (p *POSS) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name of EQUA
-func (p *POSS) GetName() string {
-	return p.Name
+	return fmt.Sprintf("Position synchronisation\n\tFormat: %s\n\tPositions: %#x\n",
+		p.Format,
+		p.Position)
 }
 
 // ProcessData will parse bytes for details
@@ -40,7 +22,13 @@ func (p *POSS) ProcessData(s int, d []byte) IFrame {
 	p.Size = s
 	p.Data = d
 
-	p.Format = d[0]
+	format := GetSize([]byte{d[0]}, 1)
+	if format == 1 {
+		p.Format = "MPEG"
+	} else {
+		p.Format = "Milliseconds"
+	}
+
 	p.Position = d[1:]
 
 	return p

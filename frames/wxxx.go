@@ -1,6 +1,9 @@
 package frames
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // WXXX provides user defined webpage links
 type WXXX struct {
@@ -10,31 +13,9 @@ type WXXX struct {
 	URL   string `json:"url"`
 }
 
-// Init will provide the initial values
-func (w *WXXX) Init(n, d string, v int) {
-	w.Name = n
-	w.Description = d
-	w.Version = v
-}
-
 // DisplayContent will comprehensively display known information
 func (w *WXXX) DisplayContent() string {
-	return ""
-}
-
-// GetExplain will provide output formatting briefly
-func (w *WXXX) GetExplain() string {
-	return w.Description
-}
-
-// GetLength will provide the length
-func (w *WXXX) GetLength() string {
-	return ""
-}
-
-// GetName will provide the Name
-func (w *WXXX) GetName() string {
-	return w.Name
+	return fmt.Sprintf("User webpage: %s [%s]\n", w.Title, w.URL)
 }
 
 // ProcessData will handle the acquisition of all data
@@ -44,19 +25,19 @@ func (w *WXXX) ProcessData(s int, d []byte) IFrame {
 
 	// text encoding is a single byte, 0 for latin, 1 for unicode
 	if len(d) > 2 {
-		enc := d[0]
+		if d[0] == '\x01' {
+			w.Utf16 = true
+		}
 		d = d[1:]
 
-		if enc == '\x00' {
+		if !w.Utf16 {
 			idx := bytes.IndexByte(d, '\x00')
 			w.Title = GetStr(d[:idx])
 			w.URL = GetStr(d[idx+LengthStandard:])
-		} else if enc == '\x01' {
-			w.Utf16 = true
-
+		} else {
 			idx := bytes.Index(d, []byte{'\x00', '\x00'})
 			w.Title = GetUnicodeStr(d[:idx])
-			w.URL = GetUnicodeStr(d[idx+LengthUnicode:])
+			w.URL = GetStr(d[idx+LengthUnicode:])
 		}
 	}
 

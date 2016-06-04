@@ -28,9 +28,7 @@ test:
     - go install "$IMPORT_PATH"
     - go vet .
   override:
-    - gocov test $(go list "$IMPORT_PATH/..." | grep -v /vendor/) > "$CIRCLE_ARTIFACTS/coverage.json"
-    - gocov-html "$CIRCLE_ARTIFACTS/coverage.json" > "$CIRCLE_ARTIFACTS/coverage.html"
-    - cd "$USAGE_PATH" && go test -covermode=count -coverprofile="$CIRCLE_ARTIFACTS/coverage.out" -coverpkg "./..."
+    - PA="$IMPORT_PATH" OUT="$CIRCLE_ARTIFACTS/coverage" make coverage
   post:
     - mv `which go-id3` "$CIRCLE_ARTIFACTS/go-id3"
 
