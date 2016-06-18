@@ -1,135 +1,83 @@
-package main
+// Package file provides the interfacing methods to working with a file on the filesystem and pushing
+// content into necessary processors for tag discovery and usage
+package id3
 
 import (
-	"flag"
+	"encoding/json"
 	"fmt"
 	"io"
-	"os"
-	"strings"
-	"text/template"
+
+	"github.com/cloudcloud/go-id3/frames"
 )
 
-// Command defines the attributes and usage processing for a specific command
-// passed to the binary for execution.
-type Command struct {
-	Run                    func(args []string, o io.Writer)
-	UsageLine, Short, Long string
+// File provides the data container for an individual File
+type File struct {
+	Filename string `json:"filename"`
+	V1       *V1    `json:"id3v1"`
+	V2       *V2    `json:"id3v2"`
+	Debug    bool   `json:"-"`
+
+	fileHandle frames.FrameFile
 }
 
-// LoggedError defines a specific workable error format.
-type LoggedError struct {
-	error
+// Version is an interface for individual version implementations
+type Version interface {
+	Parse(frames.FrameFile) error
 }
-
-var (
-	commands = []*Command{
-		readCmd,
-	}
-	isDebug   bool
-	outFormat = "text"
-)
 
 const (
-	usageTemplate = `usage: go-id3 [options] command [arguments]
-The commands are:
-{{range .}}
-	{{.Name | printf "%-11s"}} {{.Short}}{{end}}
-
-Use "go-id3 help [command]" for more information.
-
-Options:
- -d		Enable debug mode
- -f		Output format; one of the following (default is json):
-	json
-	text
-	yaml
-	raw
-`
-	helpTemplate = `usage: go-id3 {{.UsageLine}}
-{{.Long}}
-`
-	defaultDebug  = false
-	defaultFormat = "json"
+	readFromEnd   = 2
+	readFromStart = 0
 )
 
-func init() {
-	flag.BoolVar(&isDebug, "d", defaultDebug, "Provide debugging information (shorthand)")
-	flag.StringVar(&outFormat, "f", defaultFormat, "Format for output response (shorthand)")
-	flag.Usage = func() { usage(1) }
+// Process will begin the opening and loading of File content
+func (f *File) Process(h frames.FrameFile) *File {
+	f.fileHandle = h
+
+	// run through v1
+	f.V1 = &V1{Debug: f.Debug}
+	f.V1.Parse(f.fileHandle)
+
+	// run through v2
+	f.V2 = &V2{Debug: f.Debug}
+	f.V2.Parse(f.fileHandle)
+
+	return f
 }
 
-func main() {
-	flag.Parse()
-	args := flag.Args()
+// PrettyPrint draws a nice representation of the file for the command line
+func (f *File) PrettyPrint(o io.Writer, format string) {
+	switch format {
+	case "text":
+		fmt.Fprintf(o, "Artist: %s\n", f.GetArtist())
+		fmt.Fprintf(o, "Album:  %s\n", f.GetAlbum())
 
-	if len(args) < 1 || flag.Arg(0) == "help" {
-		if len(args) == 1 {
-			usage(0)
-		}
-		if len(args) > 1 {
-			for _, cmd := range commands {
-				if cmd.Name() == flag.Arg(1) {
-					tmpl(os.Stdout, helpTemplate, cmd)
-					return
-				}
-			}
-		}
-		usage(2)
-	}
-
-	defer func() {
-		if err := recover(); err != nil {
-			if _, ok := err.(LoggedError); !ok {
-				fmt.Printf("Have error: [%s]\n\n", err)
-			}
-			os.Exit(1)
-		}
-	}()
-
-	for _, cmd := range commands {
-		if cmd.Name() == flag.Arg(0) {
-			cmd.Run(args[1:], os.Stdout)
-			os.Exit(0)
-		}
-	}
-
-	errorf("unknown command [%q]\nRun 'go-id3 help' for usage.\n", flag.Arg(0))
-}
-
-func errorf(format string, args ...interface{}) {
-	if !strings.HasSuffix(format, "\n") {
-		format += "\n"
-	}
-
-	fmt.Fprintf(os.Stderr, format, args...)
-}
-
-func usage(exit int) {
-	tmpl(os.Stderr, usageTemplate, commands)
-	os.Exit(exit)
-}
-
-func tmpl(w io.Writer, text string, data interface{}) {
-	t := template.New("top")
-	template.Must(t.Parse(text))
-	if err := t.Execute(w, data); err != nil {
-		panic(err)
+	case "yaml":
+	case "raw":
+	case "json":
+		fallthrough
+	default:
+		e := json.NewEncoder(o)
+		e.Encode(f)
 	}
 }
 
-// Name provides a way to display the name of a command. As each command is stored within the
-// structure nameless, this function will process what exists to determine the name.
-func (cmd *Command) Name() string {
-	name := cmd.UsageLine
-	i := strings.Index(name, " ")
-	if i >= 0 {
-		name = name[:i]
+// GetArtist will determine the ideal Artist string for use
+func (f *File) GetArtist() string {
+	a := f.V2.GetArtist()
+	if len(a) < 1 {
+		a = f.V1.Artist
 	}
-	return name
+
+	return a
 }
 
-func catcher(o io.Writer) {
-	if r := recover(); r != nil {
-		fmt.Fprintf(o, "Encountered panic(), %s.\n", r)
+// GetAlbum will determine the ideal Album string for use
+func (f *File) GetAlbum() string {
+	a := f.V2.GetAlbum()
+	if len(a) < 1 {
+		a = f.V1.Album
 	}
+
+	return a
 }
