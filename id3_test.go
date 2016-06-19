@@ -100,6 +100,50 @@ func TestNoV2Json(t *testing.T) {
 	}
 }
 
+func TestNoV2Yaml(t *testing.T) {
+	b := &tfile{}
+	b.Write([]byte("TAGBob is great                  " +
+		"Bob                           " +
+		"Bobbum                        " +
+		"2016" +
+		"This is just a comment here " +
+		"01\x01"))
+
+	f := &File{Debug: false}
+	f.Process(b)
+
+	expected := `filename: ""
+v1:
+  artist: Bob
+  title: Bob is great
+  album: Bobbum
+  year: 2016
+  comment: This is just a comment here
+  track: 1
+  genre: 0
+  debug: false
+v2:
+  frames: []
+  major: 0
+  min: 0
+  flag: 0
+  size: 0
+  unsynchronised: false
+  extended: false
+  experimental: false
+  footer: false
+  debug: false
+debug: false`
+
+	var o bytes.Buffer
+	f.PrettyPrint(&o, "yaml")
+
+	found := strings.TrimRight(o.String(), "\n")
+	if expected != found {
+		t.Fatalf("Got [%s] but expected [%s]", found, expected)
+	}
+}
+
 type tfile struct {
 	seekVal int
 	buf     *bytes.Buffer
