@@ -21,6 +21,12 @@ type V2 struct {
 	Experimental   bool            `json:"experimental"`
 	Footer         bool            `json:"footer"`
 
+	ExtendedSize    int    `json:"extended_size" yaml:"extended_size"`
+	ExtendedFlag    []byte `json:"extended_flag" yaml:"extended_flag"`
+	ExtendedPadding int    `json:"extended_padding" yaml:"extended_padding"`
+	Crc             bool   `json:"crc"`
+	CrcContent      []byte `json:"crc_content" yaml:"crc_content"`
+
 	Debug  bool `json:"-"`
 	file   frames.FrameFile
 	offset int
@@ -74,11 +80,16 @@ func (f *V2) Parse(h frames.FrameFile) error {
 	f.Size = frames.GetSize(buf[offset:], bitwiseSeventhShifter)
 
 	if f.Extended {
-		fmt.Println("Unimplemented: handle extended tag header")
-
-		// soaking up the bytes for the moment
 		extended := f.nextBytes(v2HeaderLength)
-		_ = extended
+
+		f.ExtendedSize = frames.GetSize(extended[:4], 8)
+		f.ExtendedFlag = extended[4:6]
+		f.ExtendedPadding = frames.GetSize(extended[6:], 8)
+
+		f.Crc = frames.GetBoolBit(extended[4], 7)
+		if f.Crc {
+			f.CrcContent = f.nextBytes(4)
+		}
 	}
 
 	// wait for a panic

@@ -1,6 +1,9 @@
 package id3
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestBaseV2(t *testing.T) {
 	b := &tfile{}
@@ -16,7 +19,7 @@ func TestBaseV2(t *testing.T) {
 func TestParseV2(t *testing.T) {
 	b := &tfile{}
 	b.Write([]byte("ID3\x03\x00\x40\x00\x00\x00\x2b" +
-		"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" +
+		"\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00" +
 		"TPE1\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
 		"FAIL\x00\x00\x00\x00\x00\x00"))
 	v := &V2{Debug: false}
@@ -25,23 +28,53 @@ func TestParseV2(t *testing.T) {
 		t.Fatalf("Unable to Parse() with V2 (v2.3.0)")
 	}
 
-	if v.GetArtist() != "Cult of Luna" {
-		t.Fatalf("Parse() didn't pick the Artist correctly, [%s][%s]", "Cult of Luna", v.GetArtist())
+	found := v.GetArtist()
+	expected := "Cult of Luna"
+	if found != expected {
+		t.Fatalf("Found [%s], Expected [%s]", found, expected)
+	}
+}
+
+func TestParseV2Crc(t *testing.T) {
+	b := &tfile{}
+	b.Write([]byte("ID3\x03\x00\x40\x00\x00\x00\x2b" +
+		"\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00" +
+		"\x00\x02\x00\xaa" +
+		"TPE1\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
+		"FAIL\x00\x00\x00\x00\x00\x00"))
+	v := &V2{Debug: false}
+	err := v.Parse(b)
+	if err != nil {
+		t.Fatalf("Unable to Parse() with V2 (v2.3.0)")
 	}
 
-	b = &tfile{}
-	v = &V2{Debug: true}
+	if !v.Crc {
+		t.Fatal("Expected CRC processing")
+	}
+
+	calculated := v.CrcContent
+	should := []byte("\x00\x02\x00\xaa")
+	if !bytes.Equal(should, calculated) {
+		t.Fatalf("Found %v, Expected %v", should, calculated)
+	}
+}
+
+func TestParseV2Debug(t *testing.T) {
+	b := &tfile{}
+	v := &V2{Debug: true}
 	b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x35" +
 		"TEXT\x00\x00\x00\x0a\x00\x00\x00CerealBoy" +
 		"FAIL\x00\x00\x00\x00\x00\x00" +
 		"TPE2\x00\x00\x00\x0d\x00\x00\x00Cult of Luna"))
-	err = v.Parse(b)
+	err := v.Parse(b)
 	if err != nil {
 		t.Fatalf("Unable to Parse() with V2 (v2.4.0)")
 	}
 
-	if v.GetArtist() != "Cult of Luna" {
-		t.Fatalf("Parse() invalid Artist for Version4, [%s][%s]", "Cult of Luna", v.GetArtist())
+	found := v.GetArtist()
+	expected := "Cult of Luna"
+	if found != expected {
+		t.Fatalf("Found [%s], Expected [%s]", found, expected)
 	}
 }
 
