@@ -25,7 +25,7 @@ dependencies:
 
 test:
   pre:
-    - go install "$IMPORT_PATH"
+    - go install "$IMPORT_PATH/go-id3"
     - go vet .
   override:
     - PA="$IMPORT_PATH" OUT="$CIRCLE_ARTIFACTS/coverage" make coverage

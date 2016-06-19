@@ -1,36 +1,113 @@
-package main
+package id3
 
 import (
 	"bytes"
+	"fmt"
+	"os"
+	"strings"
 	"testing"
 )
 
-func TestBasicTmpl(t *testing.T) {
+func TestBaseFile(t *testing.T) {
+	if os.Getenv("INT") != "1" {
+		t.SkipNow()
+	}
+
+	filename := os.Getenv("FILENAME")
+	f := &File{Filename: filename, Debug: true}
+	handle, err := os.Open(f.Filename)
+	if err != nil {
+		t.Fatalf("Unable to open file, %#v", err)
+	}
 	defer func() {
-		if x := recover(); x == nil {
-			t.Errorf("Was expecting a panic in tmpl()")
+		if a := recover(); a != nil {
+			t.Fatal(a)
 		}
 	}()
 
-	var b bytes.Buffer
-	tmpl(&b, "Hello, friend. {{.Fail}}", interface{}(""))
-	t.Errorf("Panic wasn't triggered.")
+	f.Process(handle)
 }
 
-func TestBasicName(t *testing.T) {
-	found := readCmd.Name()
-	expected := "read"
+func TestNoFile(t *testing.T) {
+	b := &tfile{}
+	b.Write([]byte("ID3\x03\x00\x00\x00\x00\x00\x17" +
+		"TPE2\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
+		"TAGBob is great                  " +
+		"Bob                           " +
+		"Bobbum                        " +
+		"2016" +
+		"This is just a comment here " +
+		"01\x01"))
 
-	if found != expected {
-		t.Fatalf("Got [%s], Expected [%s]", found, expected)
+	f := &File{Debug: false}
+	f.Process(b)
+
+	expected := "Artist: Cult of Luna\nAlbum:  Bobbum\n"
+
+	var o bytes.Buffer
+	f.PrettyPrint(&o, "text")
+
+	if expected != o.String() {
+		t.Fatalf("Got [%s] but expected [%s]", o.String(), expected)
+	}
+}
+
+func TestNoV2(t *testing.T) {
+	b := &tfile{}
+	b.Write([]byte("TAGBob is great                  " +
+		"Bob                           " +
+		"Bobbum                        " +
+		"2016" +
+		"This is just a comment here " +
+		"01\x01"))
+
+	f := &File{Debug: false}
+	f.Process(b)
+
+	expected := "Artist: Bob\nAlbum:  Bobbum\n"
+
+	var o bytes.Buffer
+	f.PrettyPrint(&o, "text")
+
+	if expected != o.String() {
+		t.Fatalf("Got [%s] but expected [%s]", o.String(), expected)
+	}
+}
+
+func TestNoV2Json(t *testing.T) {
+	b := &tfile{}
+	b.Write([]byte("TAGBob is great                  " +
+		"Bob                           " +
+		"Bobbum                        " +
+		"2016" +
+		"This is just a comment here " +
+		"01\x01"))
+
+	f := &File{Debug: false}
+	f.Process(b)
+
+	expected := `{"filename":"","id3v1":{"artist":"Bob","title":"Bob is great","album":"Bobbum","year":2016,` +
+		`"comment":"This is just a comment here","track":1,"genre":0},"id3v2":{"frames":[],"major_version":0,` +
+		`"min_version":0,"flag":0,"tag_size":0,"unsynchronised":false,"extended":false,"experimental":false,` +
+		`"footer":false}}`
+
+	var o bytes.Buffer
+	f.PrettyPrint(&o, "json")
+
+	found := strings.TrimRight(o.String(), "\n")
+	if expected != found {
+		t.Fatalf("Got [%s] but expected [%s]", found, expected)
 	}
 }
 
 type tfile struct {
-	buf *bytes.Buffer
+	seekVal int
+	buf     *bytes.Buffer
 }
 
 func (t *tfile) Seek(o int64, w int) (int64, error) {
+	t.seekVal = w
+
 	return 0, nil
 }
 
@@ -39,7 +116,21 @@ func (t *tfile) Close() error {
 }
 
 func (t *tfile) Read(b []byte) (int, error) {
-	t.buf.Read(b)
+	if t.seekVal == v1TagLocation {
+		length := t.buf.Len()
+		fmt.Println(length, len(b))
+
+		if length > v1TagSize {
+			r := bytes.NewReader(t.buf.Bytes())
+			r.ReadAt(b, int64(length-v1TagSize))
+		} else {
+			t.buf.Read(b)
+		}
+
+		t.seekVal = 0
+	} else {
+		t.buf.Read(b)
+	}
 
 	return len(b), nil
 }

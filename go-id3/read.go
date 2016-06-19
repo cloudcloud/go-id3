@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/cloudcloud/go-id3/file"
+	file "github.com/cloudcloud/go-id3"
 )
 
 var readCmd = &Command{
