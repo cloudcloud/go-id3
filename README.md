@@ -14,4 +14,4 @@ go
 ```
 
 ## installation
-Standard installation is simply using ``go get github.com/cloudcloud/go-id3`` to import the libraries and compile the binaries. Your go environment will need to be correctly configured and available for this to function correctly though.
+Standard installation is simply using ``go get github.com/cloudcloud/go-id3/...`` to import the libraries and compile the binaries. Your go environment will need to be correctly configured and available for this to function correctly though.

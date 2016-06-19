@@ -11,7 +11,7 @@ type APIC struct {
 
 	MimeType    string `json:"mime_type"`
 	PictureType string `json:"picture_type"`
-	Image       []byte `json:"image"`
+	Image       []byte `json:"image" yaml:"image"`
 	Title       string `json:"title"`
 }
 

@@ -7,6 +7,7 @@ machine:
     GOROOT: "/usr/local/go"
     GOPATH: "/usr/local/go/"
     USAGE_PATH: "$GOPATH/src/$IMPORT_PATH"
+    GO15VENDOREXPERIMENT: "1"
 
 checkout:
   post:
@@ -25,7 +26,7 @@ dependencies:
 
 test:
   pre:
-    - go install "$IMPORT_PATH/go-id3"
+    - go install "$IMPORT_PATH/..."
     - go vet .
   override:
     - PA="$IMPORT_PATH" OUT="$CIRCLE_ARTIFACTS/coverage" make coverage

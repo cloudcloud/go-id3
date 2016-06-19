@@ -1,4 +1,4 @@
-// Package file provides the interfacing methods to working with a file on the filesystem and pushing
+// Package id3 provides the interfacing methods to working with a file on the filesystem and pushing
 // content into necessary processors for tag discovery and usage
 package id3
 
@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/cloudcloud/go-id3/frames"
+	"gopkg.in/yaml.v2"
 )
 
 // File provides the data container for an individual File
@@ -53,7 +54,11 @@ func (f *File) PrettyPrint(o io.Writer, format string) {
 		fmt.Fprintf(o, "Album:  %s\n", f.GetAlbum())
 
 	case "yaml":
+		out, _ := yaml.Marshal(f)
+		fmt.Fprintf(o, string(out))
+
 	case "raw":
+
 	case "json":
 		fallthrough
 	default:

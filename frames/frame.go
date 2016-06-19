@@ -49,9 +49,9 @@ const (
 // format is "inherited" within specific Frame type for shared usage.
 type Frame struct {
 	Name        string `json:"name"`
-	Version     int    `json:"-"`
+	Version     int    `json:"-" yaml:"-"`
 	Description string `json:"description"`
-	Data        []byte `json:"-"`
+	Data        []byte `json:"-" yaml:"-"`
 	Cleaned     string `json:"cleaned"`
 	Size        int    `json:"size"`
 
