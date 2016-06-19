@@ -89,7 +89,7 @@ func TestNoV2Json(t *testing.T) {
 	expected := `{"filename":"","id3v1":{"artist":"Bob","title":"Bob is great","album":"Bobbum","year":2016,` +
 		`"comment":"This is just a comment here","track":1,"genre":0},"id3v2":{"frames":[],"major_version":0,` +
 		`"min_version":0,"flag":0,"tag_size":0,"unsynchronised":false,"extended":false,"experimental":false,` +
-		`"footer":false}}`
+		`"footer":false,"extended_size":0,"extended_flag":null,"extended_padding":0,"crc":false,"crc_content":null}}`
 
 	var o bytes.Buffer
 	f.PrettyPrint(&o, "json")
@@ -132,6 +132,11 @@ v2:
   extended: false
   experimental: false
   footer: false
+  extended_size: 0
+  extended_flag: []
+  extended_padding: 0
+  crc: false
+  crc_content: []
   debug: false
 debug: false`
 
