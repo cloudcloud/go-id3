@@ -3,6 +3,7 @@ Go lib and binary for working with id3v1 and id3v2 tags.
 
 [![GoDoc](https://godoc.org/github.com/cloudcloud/go-id3?status.svg)](https://godoc.org/github.com/cloudcloud/go-id3)
 [![Circle CI](https://circleci.com/gh/cloudcloud/go-id3.svg?style=svg)](https://circleci.com/gh/cloudcloud/go-id3)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cloudcloud/go-id3)](https://goreportcard.com/report/github.com/cloudcloud/go-id3)
 [![codecov](https://codecov.io/gh/cloudcloud/go-id3/branch/master/graph/badge.svg)](https://codecov.io/gh/cloudcloud/go-id3)
 
 ## explanation
