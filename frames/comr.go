@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// COMR contains commerical details
+// COMR contains commercial details
 type COMR struct {
 	Frame
 

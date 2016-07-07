@@ -12,8 +12,6 @@ machine:
 checkout:
   post:
     - sudo chown -R `whoami`:`whoami` "$GOPATH"
-    - git submodule sync
-    - git submodule update --init
 
 dependencies:
   pre:
