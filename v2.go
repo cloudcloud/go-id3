@@ -46,51 +46,72 @@ const (
 	v2NewByteLen          = 4     // subsequent versioned lengths
 	bitwiseSeventhShifter = 7     // significant bits for an int
 	bitwiseEighthShifter  = 8     // significant bits for an int
+
+	v2OffsetMajor = 3
+	v2OffsetMinor = 4
+	v2OffsetFlag  = 5
+	v2OffsetSize  = 6
 )
 
-// Parse will trawl a file handle for frames
-func (f *V2) Parse(h frames.FrameFile) error {
-	f.file = h
-	offset := v2HeaderOffset
-	f.Frames = []frames.IFrame{}
-
-	// have a stream, will read bytes from it
+func getBuffer(f frames.FrameFile) ([]byte, error) {
 	buf := make([]byte, v2HeaderLength)
-	f.file.Seek(v2HeaderStart, v2HeaderStart) // go back to start
-	f.file.Read(buf)
+	f.Seek(v2HeaderStart, v2HeaderStart)
+	f.Read(buf)
 
-	if string(buf[:offset]) != v2HeaderInit {
-		return fmt.Errorf("Not a valid ID3 Version 2 tag found")
+	if string(buf[:v2HeaderOffset]) != v2HeaderInit {
+		return nil, fmt.Errorf("Not a valid ID3 Version 2 tag found")
 	}
 
-	f.Major = frames.GetDirectInt(buf[offset]) // first index for major version
+	return buf, nil
+}
 
-	offset++ // 5th index contains version min identifier
-	f.Min = frames.GetDirectInt(buf[offset])
+func (f *V2) primeHeaderFromFile(h frames.FrameFile) error {
+	f.file = h
+	f.Frames = []frames.IFrame{}
 
-	offset++ // 6th index contains bits for specific tag modifiers
-	f.Flag = buf[offset]
+	buf, err := getBuffer(h)
+	if err != nil {
+		return err
+	}
+
+	f.Major = frames.GetDirectInt(buf[v2OffsetMajor])
+	f.Min = frames.GetDirectInt(buf[v2OffsetMinor])
+	f.Flag = buf[v2OffsetFlag]
 
 	f.Unsynchronised = frames.GetBoolBit(f.Flag, v2UnsyncBit)
 	f.Extended = frames.GetBoolBit(f.Flag, v2ExtendedBit)
 	f.Experimental = frames.GetBoolBit(f.Flag, v2ExperimentalBit)
 	f.Footer = frames.GetBoolBit(f.Flag, v2FooterBit)
 
-	offset++ // final 4 bytes contain size information about the entirety of the tag
-	f.Size = frames.GetSize(buf[offset:], bitwiseSeventhShifter)
+	f.Size = frames.GetSize(buf[v2OffsetSize:], bitwiseSeventhShifter)
 
-	if f.Extended {
-		extended := f.nextBytes(v2HeaderLength)
+	return nil
+}
 
-		f.ExtendedSize = frames.GetSize(extended[:4], 8)
-		f.ExtendedFlag = extended[4:6]
-		f.ExtendedPadding = frames.GetSize(extended[6:], 8)
-
-		f.Crc = frames.GetBoolBit(extended[4], 7)
-		if f.Crc {
-			f.CrcContent = f.nextBytes(4)
-		}
+func (f *V2) primeExtended() {
+	if !f.Extended {
+		return
 	}
+
+	extended := f.nextBytes(v2HeaderLength)
+
+	f.ExtendedSize = frames.GetSize(extended[:4], 8)
+	f.ExtendedFlag = extended[4:6]
+	f.ExtendedPadding = frames.GetSize(extended[6:], 8)
+
+	f.Crc = frames.GetBoolBit(extended[4], 7)
+	if f.Crc {
+		f.CrcContent = f.nextBytes(4)
+	}
+}
+
+// Parse will trawl a file handle for frames
+func (f *V2) Parse(h frames.FrameFile) error {
+	if err := f.primeHeaderFromFile(h); err != nil {
+		return err
+	}
+
+	f.primeExtended()
 
 	// wait for a panic
 	defer f.catcher(os.Stderr)

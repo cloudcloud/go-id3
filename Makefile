@@ -19,3 +19,8 @@ coverage:
 		grep -h -v "^mode: " "$(OUT).cover" >> "$(OUT).coverage"; \
 	done
 	@sed -i 's#github.com/cloudcloud/go-id3/##' "$(OUT).coverage" && mv "$(OUT).coverage" "$(OUT).out"
+
+coverage.html:
+	COV_INPUT=$@
+	$(shell COV_INPUT[0]="")
+	go test -coverprofile=/tmp/cov ${COV_INPUT} && go tool cover -html=/tmp/cov
