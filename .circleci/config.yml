@@ -3,14 +3,9 @@ jobs:
   build:
     working_directory: &work_dir /usr/local/go/src/github.com/cloudcloud/go-id3
     docker:
-      - image: golang:1.11-alpine
+      - image: cloudcloud/golang:1.11
     environment: &environment
     steps:
-      - run:
-          name: Installs Deps
-          command: |
-            apk update
-            apk add git bash
       - checkout
       - run:
           name: Run Tests
