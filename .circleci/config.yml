@@ -6,12 +6,12 @@ jobs:
       - image: golang:1.11-alpine
     environment: &environment
     steps:
-      - checkout
       - run:
           name: Installs Deps
           command: |
             apk update
             apk add git bash
+      - checkout
       - run:
           name: Run Tests
           command: |
