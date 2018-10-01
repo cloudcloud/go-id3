@@ -9,7 +9,8 @@ jobs:
       - run:
           name: Checkout code
           command: |
-            git clone https://github.com/cloudcloud/go-id3.git
+            # Checking out to the current working directory
+            git clone https://github.com/cloudcloud/go-id3.git .
       - run:
           name: Run Tests
           command: |
