@@ -52,6 +52,7 @@ func (f *File) PrettyPrint(o io.Writer, format string) {
 	case "text":
 		fmt.Fprintf(o, "Artist: %s\n", f.GetArtist())
 		fmt.Fprintf(o, "Album:  %s\n", f.GetAlbum())
+		fmt.Fprintf(o, "Title:  %s\n", f.GetTitle())
 
 	case "yaml":
 		out, _ := yaml.Marshal(f)
@@ -67,7 +68,7 @@ func (f *File) PrettyPrint(o io.Writer, format string) {
 	}
 }
 
-// GetArtist will determine the ideal Artist string for use
+// GetArtist will determine the ideal Artist string for use.
 func (f *File) GetArtist() string {
 	a := f.V2.GetArtist()
 	if len(a) < 1 {
@@ -77,11 +78,21 @@ func (f *File) GetArtist() string {
 	return a
 }
 
-// GetAlbum will determine the ideal Album string for use
+// GetAlbum will determine the ideal Album string for use.
 func (f *File) GetAlbum() string {
 	a := f.V2.GetAlbum()
 	if len(a) < 1 {
 		a = f.V1.Album
+	}
+
+	return a
+}
+
+// GetTitle will provide the title found for the song.
+func (f *File) GetTitle() string {
+	a := f.V2.GetTitle()
+	if len(a) < 1 {
+		a = f.V1.Title
 	}
 
 	return a

@@ -2,7 +2,11 @@ package id3
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
+
+	"github.com/cloudcloud/go-id3/frames"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBaseV2(t *testing.T) {
@@ -192,4 +196,27 @@ func catchMe(v *V2, b *tfile) {
 	defer v.catcher(b)
 
 	panic("testing")
+}
+
+func TestGetTitle(t *testing.T) {
+	assert := assert.New(t)
+	x := []frames.IFrame{
+		frames.NewFrame("TIT2", "Track Title", 0),
+		frames.NewFrame("TIT3", "Track Title", 0),
+		frames.NewFrame("TIT1", "Track Title", 0),
+		frames.NewFrame("TT2", "Track Title", 0),
+		frames.NewFrame("TT3", "Track Title", 0),
+		frames.NewFrame("TT1", "Track Title", 0),
+	}
+
+	for _, i := range x {
+		expected := fmt.Sprintf("Hello! %s.", i.GetName())
+
+		i.(*frames.TEXT).Cleaned = expected
+		v := &V2{Frames: []frames.IFrame{i}}
+
+		actual := v.GetTitle()
+
+		assert.Equal(expected, actual, "")
+	}
 }

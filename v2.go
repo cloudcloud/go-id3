@@ -223,6 +223,26 @@ func (f *V2) GetAlbum() string {
 	return b
 }
 
+// GetTitle will determine the ideal title for the song.
+func (f *V2) GetTitle() string {
+	b := ""
+	if a := f.GetFrame("TIT2"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TIT3"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TIT1"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TT2"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TT3"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	} else if a := f.GetFrame("TT1"); a != nil {
+		b = a.(*frames.TEXT).Cleaned
+	}
+
+	return b
+}
+
 func (f *V2) catcher(o io.Writer) {
 	if r := recover(); r != nil {
 		fmt.Fprintf(o, "Stumbled upon a panic(), %s.\n", r)

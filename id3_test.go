@@ -42,7 +42,7 @@ func TestNoFile(t *testing.T) {
 	f := &File{Debug: false}
 	f.Process(b)
 
-	expected := "Artist: Cult of Luna\nAlbum:  Bobbum\n"
+	expected := "Artist: Cult of Luna\nAlbum:  Bobbum\nTitle:  Bob is great\n"
 
 	var o bytes.Buffer
 	f.PrettyPrint(&o, "text")
@@ -64,7 +64,7 @@ func TestNoV2(t *testing.T) {
 	f := &File{Debug: false}
 	f.Process(b)
 
-	expected := "Artist: Bob\nAlbum:  Bobbum\n"
+	expected := "Artist: Bob\nAlbum:  Bobbum\nTitle:  Bob is great\n"
 
 	var o bytes.Buffer
 	f.PrettyPrint(&o, "text")
