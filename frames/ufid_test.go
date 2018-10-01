@@ -2,7 +2,7 @@ package frames
 
 import "testing"
 
-func TestufidBasicOutput(t *testing.T) {
+func TestUfidBasicOutput(t *testing.T) {
 	x := NewFrame("UFID", "Unique file identifier", Version3).(*UFID)
 
 	expected := "UFID"

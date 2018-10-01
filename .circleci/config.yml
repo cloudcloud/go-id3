@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    working_directory: &work_dir /usr/local/go/src/github.com/cloudcloud/go-id3
+    docker:
+      - image: cloudcloud/golang:1.11
+    environment: &environment
+    steps:
+      - checkout
+      - run:
+          name: Run Tests
+          command: |
+            set -eou pipefail
+            go test ./...
+      - run:
+          name: Artifact Binary
+          command: |
+            go install ./...
+            mv `which go-id3` ${CIRCLE_ARTIFACTS}/go-id3
+      - run:
+          name: Coverage Upload
+          command: |
+            go test -coverprofile=${CIRCLE_ARTIFACTS}/coverage.out ./...
+            go tool cover -html=${CIRCLE_ARTIFACTS}/coverage.out -o ${CIRCLE_ARTIFACTS}/coverage.html
+            bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_ARTIFACTS}/coverage.out
+
+workflows:
+  version: 2
+  go-id3:
+    jobs:
+      - build
