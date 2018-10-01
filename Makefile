@@ -21,4 +21,4 @@ coverage:
 	@sed -i 's#github.com/cloudcloud/go-id3/##' "$(OUT).coverage" && mv "$(OUT).coverage" "$(OUT).out"
 
 coverage.html:
-	go test -coverprofile=/tmp/cov ./... && go tool cover -html=/tmp/cov
+	go test -coverprofile=/tmp/cov ./... && go tool cover -html=/tmp/cov -o ./coverage.html
