@@ -67,6 +67,164 @@ type Frame struct {
 }
 
 var (
+	frameInst = map[string]func() IFrame{
+		"AENC": func() IFrame { return new(AENC) },
+		"APIC": func() IFrame { return new(APIC) },
+		"ASPI": func() IFrame { return new(ASPI) },
+		"BUF":  func() IFrame { return new(RBUF) },
+		"CNT":  func() IFrame { return new(PCNT) },
+		"COM":  func() IFrame { return new(COMM) },
+		"COMM": func() IFrame { return new(COMM) },
+		"COMR": func() IFrame { return new(COMR) },
+		"CRA":  func() IFrame { return new(AENC) },
+		"CRM":  func() IFrame { return new(CRM) },
+		"ENCR": func() IFrame { return new(ENCR) },
+		"EQU":  func() IFrame { return new(EQUA) },
+		"EQU2": func() IFrame { return new(EQU2) },
+		"EQUA": func() IFrame { return new(EQUA) },
+		"ETC":  func() IFrame { return new(ETCO) },
+		"ETCO": func() IFrame { return new(ETCO) },
+		"GEO":  func() IFrame { return new(GEOB) },
+		"GEOB": func() IFrame { return new(GEOB) },
+		"GRID": func() IFrame { return new(GRID) },
+		"IPL":  func() IFrame { return new(IPLS) },
+		"IPLS": func() IFrame { return new(IPLS) },
+		"LNK":  func() IFrame { return new(LINK) },
+		"LINK": func() IFrame { return new(LINK) },
+		"MCI":  func() IFrame { return new(MCDI) },
+		"MCDI": func() IFrame { return new(MCDI) },
+		"MLL":  func() IFrame { return new(MLLT) },
+		"MLLT": func() IFrame { return new(MLLT) },
+		"OWNE": func() IFrame { return new(OWNE) },
+		"PCNT": func() IFrame { return new(PCNT) },
+		"PIC":  func() IFrame { return new(APIC) },
+		"POP":  func() IFrame { return new(POPM) },
+		"POPM": func() IFrame { return new(POPM) },
+		"POSS": func() IFrame { return new(POSS) },
+		"PRIV": func() IFrame { return new(PRIV) },
+		"RBUF": func() IFrame { return new(RBUF) },
+		"REV":  func() IFrame { return new(RVRB) },
+		"RVA":  func() IFrame { return new(RVAD) },
+		"RVA2": func() IFrame { return new(RVA2) },
+		"RVAD": func() IFrame { return new(RVAD) },
+		"RVRB": func() IFrame { return new(RVRB) },
+		"SEEK": func() IFrame { return new(SEEK) },
+		"SIGN": func() IFrame { return new(SIGN) },
+		"SLT":  func() IFrame { return new(SYLT) },
+		"STC":  func() IFrame { return new(SYTC) },
+		"SYLT": func() IFrame { return new(SYLT) },
+		"SYTC": func() IFrame { return new(SYTC) },
+		"TAL":  func() IFrame { return new(TEXT) },
+		"TALB": func() IFrame { return new(TEXT) },
+		"TBP":  func() IFrame { return new(TEXT) },
+		"TBPM": func() IFrame { return new(TEXT) },
+		"TCM":  func() IFrame { return new(TEXT) },
+		"TCO":  func() IFrame { return new(TEXT) },
+		"TCOM": func() IFrame { return new(TEXT) },
+		"TCON": func() IFrame { return new(TEXT) },
+		"TCOP": func() IFrame { return new(TEXT) },
+		"TCR":  func() IFrame { return new(TEXT) },
+		"TDA":  func() IFrame { return new(TEXT) },
+		"TDAT": func() IFrame { return new(TEXT) },
+		"TDEN": func() IFrame { return new(TEXT) },
+		"TDLY": func() IFrame { return new(TEXT) },
+		"TDOR": func() IFrame { return new(TEXT) },
+		"TDRC": func() IFrame { return new(TEXT) },
+		"TDRL": func() IFrame { return new(TEXT) },
+		"TDTG": func() IFrame { return new(TEXT) },
+		"TDY":  func() IFrame { return new(TEXT) },
+		"TEN":  func() IFrame { return new(TEXT) },
+		"TENC": func() IFrame { return new(TEXT) },
+		"TEXT": func() IFrame { return new(TEXT) },
+		"TFLT": func() IFrame { return new(TEXT) },
+		"TFT":  func() IFrame { return new(TEXT) },
+		"TIM":  func() IFrame { return new(TEXT) },
+		"TIME": func() IFrame { return new(TEXT) },
+		"TIPL": func() IFrame { return new(TEXT) },
+		"TIT1": func() IFrame { return new(TEXT) },
+		"TIT2": func() IFrame { return new(TEXT) },
+		"TIT3": func() IFrame { return new(TEXT) },
+		"TKE":  func() IFrame { return new(TEXT) },
+		"TKEY": func() IFrame { return new(TEXT) },
+		"TLA":  func() IFrame { return new(TEXT) },
+		"TLAN": func() IFrame { return new(TEXT) },
+		"TLE":  func() IFrame { return new(TEXT) },
+		"TLEN": func() IFrame { return new(TEXT) },
+		"TMCL": func() IFrame { return new(TEXT) },
+		"TMED": func() IFrame { return new(TEXT) },
+		"TMOO": func() IFrame { return new(TEXT) },
+		"TMT":  func() IFrame { return new(TEXT) },
+		"TOA":  func() IFrame { return new(TEXT) },
+		"TOAL": func() IFrame { return new(TEXT) },
+		"TOF":  func() IFrame { return new(TEXT) },
+		"TOFN": func() IFrame { return new(TEXT) },
+		"TOL":  func() IFrame { return new(TEXT) },
+		"TOLY": func() IFrame { return new(TEXT) },
+		"TOPE": func() IFrame { return new(TEXT) },
+		"TOR":  func() IFrame { return new(TEXT) },
+		"TORY": func() IFrame { return new(TEXT) },
+		"TOT":  func() IFrame { return new(TEXT) },
+		"TOWN": func() IFrame { return new(TEXT) },
+		"TP1":  func() IFrame { return new(TEXT) },
+		"TP2":  func() IFrame { return new(TEXT) },
+		"TP3":  func() IFrame { return new(TEXT) },
+		"TP4":  func() IFrame { return new(TEXT) },
+		"TPA":  func() IFrame { return new(TEXT) },
+		"TPB":  func() IFrame { return new(TEXT) },
+		"TPE1": func() IFrame { return new(TEXT) },
+		"TPE2": func() IFrame { return new(TEXT) },
+		"TPE3": func() IFrame { return new(TEXT) },
+		"TPE4": func() IFrame { return new(TEXT) },
+		"TPOS": func() IFrame { return new(TEXT) },
+		"TPRO": func() IFrame { return new(TEXT) },
+		"TPUB": func() IFrame { return new(TEXT) },
+		"TRC":  func() IFrame { return new(TEXT) },
+		"TRCK": func() IFrame { return new(TEXT) },
+		"TRD":  func() IFrame { return new(TEXT) },
+		"TRDA": func() IFrame { return new(TEXT) },
+		"TRK":  func() IFrame { return new(TEXT) },
+		"TRSN": func() IFrame { return new(TEXT) },
+		"TRSO": func() IFrame { return new(TEXT) },
+		"TSI":  func() IFrame { return new(TEXT) },
+		"TSIZ": func() IFrame { return new(TEXT) },
+		"TSOA": func() IFrame { return new(TEXT) },
+		"TSOP": func() IFrame { return new(TEXT) },
+		"TSOT": func() IFrame { return new(TEXT) },
+		"TSRC": func() IFrame { return new(TEXT) },
+		"TSS":  func() IFrame { return new(TEXT) },
+		"TSSE": func() IFrame { return new(TEXT) },
+		"TSST": func() IFrame { return new(TEXT) },
+		"TT1":  func() IFrame { return new(TEXT) },
+		"TT2":  func() IFrame { return new(TEXT) },
+		"TT3":  func() IFrame { return new(TEXT) },
+		"TXT":  func() IFrame { return new(TEXT) },
+		"TYE":  func() IFrame { return new(TEXT) },
+		"TYER": func() IFrame { return new(TEXT) },
+		"TXX":  func() IFrame { return new(TXXX) },
+		"TXXX": func() IFrame { return new(TXXX) },
+		"UFI":  func() IFrame { return new(UFID) },
+		"UFID": func() IFrame { return new(UFID) },
+		"ULT":  func() IFrame { return new(USLT) },
+		"USER": func() IFrame { return new(USER) },
+		"USLT": func() IFrame { return new(USLT) },
+		"WAF":  func() IFrame { return new(WOAF) },
+		"WAR":  func() IFrame { return new(WOAF) },
+		"WAS":  func() IFrame { return new(WOAF) },
+		"WCM":  func() IFrame { return new(WOAF) },
+		"WCOM": func() IFrame { return new(WOAF) },
+		"WCOP": func() IFrame { return new(WOAF) },
+		"WCP":  func() IFrame { return new(WOAF) },
+		"WOAF": func() IFrame { return new(WOAF) },
+		"WOAR": func() IFrame { return new(WOAF) },
+		"WOAS": func() IFrame { return new(WOAF) },
+		"WORS": func() IFrame { return new(WOAF) },
+		"WPAY": func() IFrame { return new(WOAF) },
+		"WPB":  func() IFrame { return new(WOAF) },
+		"WPUB": func() IFrame { return new(WOAF) },
+		"WXX":  func() IFrame { return new(WXXX) },
+		"WXXX": func() IFrame { return new(WXXX) },
+	}
+
 	// Version22Frames defines the version 2.2 frame mapping
 	// http://id3.org/id3v2-00
 	Version22Frames = map[string]func() IFrame{
@@ -418,95 +576,17 @@ func Gen(n, d string, s int) func() IFrame {
 
 // NewFrame provides a fresh instance of a frame
 func NewFrame(n, d string, s int) IFrame {
-	var a IFrame
-
-	switch n {
-	case "CRA", "AENC":
-		a = new(AENC)
-	case "PIC", "APIC":
-		a = new(APIC)
-	case "ASPI":
-		a = new(ASPI)
-	case "COM", "COMM":
-		a = new(COMM)
-	case "COMR":
-		a = new(COMR)
-	case "CRM":
-		a = new(CRM)
-	case "ENCR":
-		a = new(ENCR)
-	case "EQU", "EQUA":
-		a = new(EQUA)
-	case "EQU2":
-		a = new(EQU2)
-	case "ETC", "ETCO":
-		a = new(ETCO)
-	case "GEO", "GEOB":
-		a = new(GEOB)
-	case "GRID":
-		a = new(GRID)
-	case "IPL", "IPLS":
-		a = new(IPLS)
-	case "LNK", "LINK":
-		a = new(LINK)
-	case "MCI", "MCDI":
-		a = new(MCDI)
-	case "MLL", "MLLT":
-		a = new(MLLT)
-	case "OWNE":
-		a = new(OWNE)
-	case "CNT", "PCNT":
-		a = new(PCNT)
-	case "POP", "POPM":
-		a = new(POPM)
-	case "POSS":
-		a = new(POSS)
-	case "PRIV":
-		a = new(PRIV)
-	case "BUF", "RBUF":
-		a = new(RBUF)
-	case "RVA", "RVAD":
-		a = new(RVAD)
-	case "RVA2":
-		a = new(RVA2)
-	case "REV", "RVRB":
-		a = new(RVRB)
-	case "SEEK":
-		a = new(SEEK)
-	case "SIGN":
-		a = new(SIGN)
-	case "SLT", "SYLT":
-		a = new(SYLT)
-	case "STC", "SYTC":
-		a = new(SYTC)
-	case "TRC", "TBP", "TSS", "TRK", "TP3", "TP2", "TP1", "TOR", "TMT", "TLE", "TCM", "TDY", "TOT", "TCR", "TT1",
-		"TT2", "TP4", "TCO", "TOF", "TPB", "TXT", "TOL", "TIM", "TFT", "TDA", "TYE", "TPA", "TEN", "TKE", "TRD", "TSI",
-		"TOA", "TT3", "TLA", "TAL", "TALB", "TBPM", "TCOM", "TCON", "TCOP", "TDAT", "TDEN", "TDLY", "TDOR", "TDRC",
-		"TDRL", "TDTG", "TENC", "TEXT", "TFLT", "TIME", "TIPL", "TIT1", "TIT2", "TIT3", "TKEY", "TLAN", "TLEN", "TMCL",
-		"TMED", "TMOO", "TOAL", "TOFN", "TOLY", "TOPE", "TORY", "TOWN", "TPE1", "TPE2", "TPE3", "TPE4", "TPOS", "TPRO",
-		"TPUB", "TRCK", "TRDA", "TRSN", "TRSO", "TSIZ", "TSOA", "TSOP", "TSOT", "TSRC", "TSSE", "TSST", "TYER":
-		a = new(TEXT)
-	case "TXX", "TXXX":
-		a = new(TXXX)
-	case "UFI", "UFID":
-		a = new(UFID)
-	case "USER":
-		a = new(USER)
-	case "ULT", "USLT":
-		a = new(USLT)
-	case "WAR", "WAS", "WAF", "WCM", "WPB", "WCP", "WCOM", "WCOP", "WOAF", "WOAR", "WOAS", "WORS", "WPAY", "WPUB":
-		a = new(WOAF)
-	case "WXX", "WXXX":
-		a = new(WXXX)
-	default:
-		fmt.Println(n)
-		return a
+	a, ok := frameInst[n]
+	if !ok {
+		fmt.Printf("Unknown frame [%s]\n", n)
+		return nil
 	}
 
+	x := a()
 	// if an interface could have vars...
-	a.Init(n, d, s)
+	x.Init(n, d, s)
 
-	return a
+	return x
 }
 
 // Init will provide the initial values
