@@ -10,16 +10,16 @@ type OWNE struct {
 	Frame
 
 	Currency     string `json:"currency"`
-	Payed        string `json:"payed"`
+	Paid         string `json:"paid"`
 	PurchaseDate string `json:"purchase_date"`
 	Seller       string `json:"seller"`
 }
 
 // DisplayContent will comprehensively display known information
 func (o *OWNE) DisplayContent() string {
-	return fmt.Sprintf("Ownership\n\tCurrency: %s\n\tPayed: %s\n\tDate: %s\n\tSeller: %s\n",
+	return fmt.Sprintf("Ownership\n\tCurrency: %s\n\tPaid: %s\n\tDate: %s\n\tSeller: %s\n",
 		o.Currency,
-		o.Payed,
+		o.Paid,
 		o.PurchaseDate,
 		o.Seller)
 }
@@ -34,7 +34,7 @@ func (o *OWNE) ProcessData(s int, d []byte) IFrame {
 
 	d = d[4:]
 	idx := bytes.IndexByte(d, '\x00')
-	o.Payed = GetStr(d[:idx])
+	o.Paid = GetStr(d[:idx])
 	d = d[idx+1:]
 
 	o.PurchaseDate = GetStr(d[:8])

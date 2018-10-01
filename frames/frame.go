@@ -203,7 +203,7 @@ var (
 		"UFID": Gen("UFID", "Unique File Identifier", Version3),
 		"USER": Gen("USER", "Terms of use", Version3),
 		"USLT": Gen("USLT", "Unsynchronised lyrics/text transcription", Version3),
-		"WCOM": Gen("WCOM", "Commerical information webpage", Version3),
+		"WCOM": Gen("WCOM", "Commercial information webpage", Version3),
 		"WCOP": Gen("WCOP", "Copyright/legal information webpage", Version3),
 		"WOAF": Gen("WOAF", "Official audio file webpage", Version3),
 		"WOAR": Gen("WOAR", "Official artist/performer webpage", Version3),
