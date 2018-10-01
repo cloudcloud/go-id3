@@ -26,7 +26,8 @@ jobs:
           command: |
             go test -coverprofile=${CIRCLE_ARTIFACTS}/coverage.out ./...
             go tool cover -html=${CIRCLE_ARTIFACTS}/coverage.out -o ${CIRCLE_ARTIFACTS}/coverage.html
-            bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_ARTIFACTS}/coverage.out
+            go test -coverprofile=${CIRCLE_ARTIFACTS}/coverage.atomic -covermode=atomic ./...
+            bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_ARTIFACTS}/coverage.atomic
 
 workflows:
   version: 2
