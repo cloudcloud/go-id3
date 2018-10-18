@@ -197,50 +197,27 @@ func (f *V2) GetFrame(n string) frames.IFrame {
 
 // GetArtist will retrieve the ideal artist for use
 func (f *V2) GetArtist() string {
-	b := ""
-	if a := f.GetFrame("TPE1"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TPE2"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TPE3"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TPE4"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	}
-
-	return b
+	return f.findTextIdx([]string{"TPE1", "TPE2", "TPE3", "TPE4"})
 }
 
 // GetAlbum will determine and give the ideal album
 func (f *V2) GetAlbum() string {
-	b := ""
-	if a := f.GetFrame("TALB"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TOAL"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	}
-
-	return b
+	return f.findTextIdx([]string{"TALB", "TOAL"})
 }
 
 // GetTitle will determine the ideal title for the song.
 func (f *V2) GetTitle() string {
-	b := ""
-	if a := f.GetFrame("TIT2"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TIT3"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TIT1"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TT2"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TT3"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
-	} else if a := f.GetFrame("TT1"); a != nil {
-		b = a.(*frames.TEXT).Cleaned
+	return f.findTextIdx([]string{"TIT2", "TIT3", "TIT1", "TT2", "TT3", "TT1"})
+}
+
+func (f *V2) findTextIdx(i []string) string {
+	for _, x := range i {
+		if a := f.GetFrame(x); a != nil {
+			return a.(*frames.TEXT).Cleaned
+		}
 	}
 
-	return b
+	return ""
 }
 
 func (f *V2) catcher(o io.Writer) {
