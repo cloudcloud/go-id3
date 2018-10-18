@@ -7,27 +7,43 @@ jobs:
     environment: &environment
     steps:
       - run:
-          name: Checkout code
+          name: Checkout Code
           command: |
             # Checking out to the current working directory
             git clone https://github.com/cloudcloud/go-id3.git .
+            mkdir -p /tmp/artifacts
       - run:
           name: Run Tests
           command: |
             set -eou pipefail
-            go test ./...
+            go test -race ./...
       - run:
           name: Artifact Binary
           command: |
             go install ./...
-            mv `which go-id3` ${CIRCLE_ARTIFACTS}/go-id3
+            mv `which go-id3` /tmp/artifacts/go-id3
       - run:
-          name: Coverage Upload
+          name: Setup CodeClimate Reporter
           command: |
-            go test -coverprofile=${CIRCLE_ARTIFACTS}/coverage.out ./...
-            go tool cover -html=${CIRCLE_ARTIFACTS}/coverage.out -o ${CIRCLE_ARTIFACTS}/coverage.html
-            go test -coverprofile=${CIRCLE_ARTIFACTS}/coverage.atomic -covermode=atomic ./...
-            bash <(curl -s https://codecov.io/bash) -f ${CIRCLE_ARTIFACTS}/coverage.atomic
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
+          name: Coverage Commands
+          command: |
+            go test -race -coverprofile=c.out -covermode=atomic ./...
+            go tool cover -html=c.out -o ./coverage.html
+            cp c.out /tmp/artifacts
+            cp cov* /tmp/artifacts
+      - run:
+          name: CodeCov Upload
+          command: bash <(curl -s https://codecov.io/bash) -f c.out
+      - run:
+          name: CodeClimate Upload
+          command: |
+            sed -i s#github.com/cloudcloud/go-id3/## c.out
+            ./cc-test-reporter after-build -t gocov --exit-code $?
+      - store_artifacts:
+          path: /tmp/artifacts
 
 workflows:
   version: 2
