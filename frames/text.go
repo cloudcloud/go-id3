@@ -15,13 +15,19 @@ func (t *TEXT) DisplayContent() string {
 // GetName will add deprecated notes where appropriate based on version
 func (t *TEXT) GetName() string {
 	out := t.Name
-	if t.Version == Version4 && (t.Name == "TDAT" ||
-		t.Name == "TIME" ||
-		t.Name == "TORY" ||
-		t.Name == "TRDA" ||
-		t.Name == "TSIZ" ||
-		t.Name == "TYER") {
-		out += " (deprecated)"
+	if t.Version == Version4 {
+		deprecated := map[string]bool{
+			"TDAT": true,
+			"TIME": true,
+			"TORY": true,
+			"TRDA": true,
+			"TSIZ": true,
+			"TYER": true,
+		}
+
+		if _, found := deprecated[t.Name]; found {
+			out += " (deprecated)"
+		}
 	}
 
 	return out
