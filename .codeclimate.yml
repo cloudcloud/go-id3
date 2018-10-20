@@ -27,3 +27,13 @@ checks:
   return-statements:
     config:
       threshold: 4
+plugins:
+  gofmt:
+    enabled: true
+  golint:
+    enabled: true
+  govet:
+    enabled: true
+  markdownlint:
+    enabled: true
+
