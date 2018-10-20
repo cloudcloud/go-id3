@@ -118,59 +118,26 @@ func (f *V2) Parse(h frames.FrameFile) error {
 
 	// trawl frames time
 	for {
-		var frameName, tmpDetail []byte
 		var resp func() frames.IFrame
 		var frame frames.IFrame
-		var ok bool
-		var tmpSize int
+		tmpSize := 0
 
 		switch f.Major {
-		case frames.Version3: // process version 3 frame
-			frameName = f.nextBytes(v2NewByteLen)
-			if len(frameName) != v2NewByteLen {
-				break
-			}
-
-			resp, ok = frames.Version23Frames[frames.GetStr(frameName)]
-			tmpDetail = f.nextBytes(v2HeaderLength - v2NewByteLen)
-			if !ok {
-				continue
-			}
-
-			tmpSize = frames.GetSize(tmpDetail[:v2NewByteLen], bitwiseEighthShifter)
-		case frames.Version4: // process version 4 frame
-			frameName = f.nextBytes(v2NewByteLen)
-			if len(frameName) != v2NewByteLen {
-				break
-			}
-
-			resp, ok = frames.Version24Frames[frames.GetStr(frameName)]
-			tmpDetail = f.nextBytes(v2HeaderLength - v2NewByteLen)
-			if !ok {
-				continue
-			}
-
-			tmpSize = frames.GetSize(tmpDetail[:v2NewByteLen], bitwiseSeventhShifter)
-		case frames.Version2: // process version 2 frame
-			frameName = f.nextBytes(v2OrigByteLen)
-			if len(frameName) != v2OrigByteLen {
-				break
-			}
-
-			resp, ok = frames.Version22Frames[frames.GetStr(frameName)]
-			if !ok {
-				continue
-			}
-
-			tmpDetail = f.nextBytes(v2OrigByteLen)
-			tmpSize = frames.GetSize(tmpDetail, bitwiseSeventhShifter)
+		case frames.Version3:
+			tmpSize, resp = f.prepV2Frame(v2NewByteLen, bitwiseEighthShifter, frames.Version23Frames, true)
+		case frames.Version4:
+			tmpSize, resp = f.prepV2Frame(v2NewByteLen, bitwiseSeventhShifter, frames.Version24Frames, true)
+		case frames.Version2:
+			tmpSize, resp = f.prepV2Frame(v2OrigByteLen, bitwiseSeventhShifter, frames.Version22Frames, false)
 		default:
 			return fmt.Errorf("Frame version not supported v2.%d.%d", f.Major, f.Min)
 		}
 
-		// if no frame, nothing to soak up before breaking
+		// lack of frame or invalid frame
 		if tmpSize == 0 {
 			break
+		} else if tmpSize == -1 {
+			continue
 		}
 
 		tmpFrame := f.nextBytes(tmpSize)
@@ -182,6 +149,41 @@ func (f *V2) Parse(h frames.FrameFile) error {
 	}
 
 	return nil
+}
+
+func (f *V2) prepV2Frame(l int, s uint, fr map[string]func() frames.IFrame, before bool) (int, func() frames.IFrame) {
+	frameName := f.nextBytes(l)
+	if f.Debug {
+		fmt.Printf("Potential name [%s]\n", frameName)
+	}
+
+	if len(frameName) != l {
+		return 0, nil
+	}
+
+	resp, ok := fr[frames.GetStr(frameName)]
+	detail := []byte{}
+	// soak up the bytes before continuing
+	if before {
+		detail = f.nextBytes(v2HeaderLength - l)
+	}
+
+	if !ok {
+		return -1, nil
+	}
+
+	if !before {
+		detail = f.nextBytes(l)
+	}
+
+	size := 0
+	if before {
+		size = frames.GetSize(detail[:l], s)
+	} else {
+		size = frames.GetSize(detail, s)
+	}
+
+	return size, resp
 }
 
 // GetFrame will provide a specific Frame if it exists

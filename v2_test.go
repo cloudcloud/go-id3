@@ -144,7 +144,11 @@ func TestParseV2Original(t *testing.T) {
 	b.Write([]byte("ID3\x02\x00\x00\x00\x00\x00\x14" +
 		"BUF\x00\x00\x08\x00\x00\x42\x00\x00\x00\x00\x05" +
 		"BUD\x00\x00\x00"))
-	v.Parse(b)
+	err := v.Parse(b)
+
+	if err != nil {
+		t.Fatalf("Unexpected error: [%s]", err)
+	}
 
 	expected := 1
 	found := len(v.Frames)

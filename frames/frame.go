@@ -83,7 +83,8 @@ func GetStr(b []byte) string {
 		str = string(r)
 	}
 
-	return strings.TrimSpace(str)
+	//return strings.TrimSpace(str)
+	return strings.Trim(str, " \t\n\r\x00")
 }
 
 // GetUnicodeStr will read a unicode byte slice to a string
