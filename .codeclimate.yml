@@ -36,4 +36,7 @@ plugins:
     enabled: true
   markdownlint:
     enabled: true
+  line-length:
+    config:
+      threshold: 120
 

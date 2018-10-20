@@ -1,7 +1,8 @@
 # go-id3
 
-Go lib and binary for working with [id3v1](http://id3.org/ID3v1), [id3v2](http://id3.org/id3v2-00),
-[id3v2.3](http://id3.org/id3v2.3.0), and [id3v2.4](http://id3.org/id3v2.4.0-structure) tags.
+Go lib and binary for working with [id3v1](http://id3.org/ID3v1),
+[id3v2](http://id3.org/id3v2-00), [id3v2.3](http://id3.org/id3v2.3.0),
+and [id3v2.4](http://id3.org/id3v2.4.0-structure) tags.
 
 [![GoDoc](https://godoc.org/github.com/cloudcloud/go-id3?status.svg)](https://godoc.org/github.com/cloudcloud/go-id3)
 [![Circle CI](https://circleci.com/gh/cloudcloud/go-id3.svg?style=svg)](https://circleci.com/gh/cloudcloud/go-id3)
