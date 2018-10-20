@@ -23,8 +23,8 @@ type LoggedError struct {
 }
 
 var (
-	commands = []*Command{
-		readCmd,
+	commands = map[string]*Command{
+		"read": readCmd,
 	}
 	isDebug   bool
 	outFormat = "text"
@@ -68,30 +68,19 @@ func main() {
 			usage(0)
 		}
 		if len(args) > 1 {
-			for _, cmd := range commands {
-				if cmd.Name() == flag.Arg(1) {
-					tmpl(os.Stdout, helpTemplate, cmd)
-					return
-				}
+			cmd, ok := commands[flag.Arg(1)]
+			if ok {
+				tmpl(os.Stdout, helpTemplate, cmd)
+				return
 			}
 		}
 		usage(2)
 	}
 
-	defer func() {
-		if err := recover(); err != nil {
-			if _, ok := err.(LoggedError); !ok {
-				fmt.Printf("Have error: [%s]\n\n", err)
-			}
-			os.Exit(1)
-		}
-	}()
-
-	for _, cmd := range commands {
-		if cmd.Name() == flag.Arg(0) {
-			cmd.Run(args[1:], os.Stdout)
-			os.Exit(0)
-		}
+	defer haveErr()
+	if cmd, ok := commands[flag.Arg(0)]; ok {
+		cmd.Run(args[1:], os.Stdout)
+		os.Exit(0)
 	}
 
 	errorf("unknown command [%q]\nRun 'go-id3 help' for usage.\n", flag.Arg(0))
@@ -115,6 +104,15 @@ func tmpl(w io.Writer, text string, data interface{}) {
 	template.Must(t.Parse(text))
 	if err := t.Execute(w, data); err != nil {
 		panic(err)
+	}
+}
+
+func haveErr() {
+	if err := recover(); err != nil {
+		if _, ok := err.(LoggedError); !ok {
+			fmt.Printf("Have error: [%s]\n\n", err)
+		}
+		os.Exit(1)
 	}
 }
 
