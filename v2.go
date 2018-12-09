@@ -199,12 +199,12 @@ func (f *V2) GetFrame(n string) frames.IFrame {
 
 // GetArtist will retrieve the ideal artist for use
 func (f *V2) GetArtist() string {
-	return f.findTextIdx([]string{"TPE1", "TPE2", "TPE3", "TPE4"})
+	return f.findTextIdx([]string{"TPE1", "TPE2", "TPE3", "TPE4", "TP1"})
 }
 
 // GetAlbum will determine and give the ideal album
 func (f *V2) GetAlbum() string {
-	return f.findTextIdx([]string{"TALB", "TOAL"})
+	return f.findTextIdx([]string{"TALB", "TOAL", "TAL"})
 }
 
 // GetTitle will determine the ideal title for the song.
