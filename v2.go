@@ -224,7 +224,7 @@ func (f *V2) findTextIdx(i []string) string {
 
 func (f *V2) catcher(o io.Writer) {
 	if r := recover(); r != nil {
-		fmt.Fprintf(o, "Stumbled upon a panic(), %s.\n", r)
+		fmt.Fprintf(o, "Stumbled upon a panic, %s.\n", r)
 	}
 }
 

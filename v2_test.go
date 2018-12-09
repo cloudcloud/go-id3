@@ -190,7 +190,7 @@ func TestCatcherElegance(t *testing.T) {
 	catchMe(v, b)
 
 	found := b.buf.String()
-	expected := "Stumbled upon a panic(), testing.\n"
+	expected := "Stumbled upon a panic, testing.\n"
 	if found != expected {
 		t.Errorf("Got [%s], Expected [%s]", found, expected)
 	}
