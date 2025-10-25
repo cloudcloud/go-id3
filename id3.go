@@ -56,7 +56,7 @@ func (f *File) PrettyPrint(o io.Writer, format string) {
 
 	case "yaml":
 		out, _ := yaml.Marshal(f)
-		fmt.Fprintf(o, string(out))
+		fmt.Fprint(o, string(out))
 
 	case "raw":
 
