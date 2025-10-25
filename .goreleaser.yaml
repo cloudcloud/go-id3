@@ -10,9 +10,9 @@ release:
 
 changelog:
   use: github-native
-  
+
 archives:
-  - format: binary
+  - formats: [ binary ]
 
 builds:
   - env:
@@ -20,6 +20,7 @@ builds:
     goos: [linux, darwin]
     goarch: [amd64, arm64]
     binary: go-id3
+    main: ./cmd/go-id3
 
 checksum:
   name_template: "go_id3_{{ .Version }}_checksums.txt"
