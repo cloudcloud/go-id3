@@ -2,7 +2,6 @@ package frames
 
 import (
 	"fmt"
-	"math"
 )
 
 // MCDI is the music cd identifier frame
@@ -27,7 +26,7 @@ func (m *MCDI) DisplayContent() string {
 func (m *MCDI) ProcessData(s int, d []byte) IFrame {
 	m.Size = s
 	m.Data = d
-	m.Tracks = make([][]byte, int(math.Ceil(float64(s/8))))
+	m.Tracks = make([][]byte, int(float64(s/8)))
 
 	if len(d) > 19 {
 		m.DiscHeader = d[:4]

@@ -2,7 +2,6 @@ package frames
 
 import (
 	"fmt"
-	"math"
 )
 
 // EQUA contains equalisation settings for the file
@@ -41,13 +40,13 @@ func (e *EQUA) ProcessData(s int, d []byte) IFrame {
 	d = d[1:]
 	e.Data = d
 
-	extraBytes := math.Ceil(float64(e.Adjustment / 8))
+	extraBytes := float64(e.Adjustment / 8)
 	chunked := int(2 + extraBytes)
 
 	for len(d) >= chunked {
 		e.Steps = append(e.Steps, &step{
 			Increment:  GetBoolBit(d[0], 8),
-			Frequency:  GetBitInt(d[0], false, 7) + GetBitInt(d[1], false, 8),
+			Frequency:  GetBitInt(d[0], false, uint(7)) + GetBitInt(d[1], false, uint(8)),
 			Adjustment: GetInt(d[2:int(extraBytes)]),
 		})
 

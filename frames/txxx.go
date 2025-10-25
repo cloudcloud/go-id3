@@ -28,11 +28,13 @@ func (t *TXXX) ProcessData(s int, d []byte) IFrame {
 		enc := d[0]
 		d = d[1:]
 
-		if enc == '\x00' {
+		switch enc {
+		case '\x00':
 			idx := bytes.IndexByte(d, '\x00')
 			t.Type = GetStr(d[:idx])
 			t.Value = GetStr(d[idx+LengthStandard:])
-		} else if enc == '\x01' {
+
+		case '\x01':
 			t.Utf16 = true
 
 			idx := bytes.Index(d, []byte{'\x00', '\x00'})

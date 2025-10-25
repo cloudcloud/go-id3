@@ -30,11 +30,13 @@ func (c *COMM) ProcessData(s int, d []byte) IFrame {
 		c.Language = GetStr(d[1:4])
 		d = d[4:]
 
-		if enc == '\x00' {
+		switch enc {
+		case '\x00':
 			idx := bytes.IndexByte(d, '\x00')
 			c.ContentDescription = GetStr(d[:idx])
 			c.Comment = GetStr(d[idx+1:])
-		} else if enc == '\x01' {
+
+		case '\x01':
 			c.Utf16 = true
 
 			idx := bytes.Index(d, []byte{'\x00', '\x00'})

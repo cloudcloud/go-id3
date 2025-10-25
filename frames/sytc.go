@@ -37,11 +37,7 @@ func (z *SYTC) ProcessData(s int, d []byte) IFrame {
 	}
 	d = d[1:]
 
-	for {
-		if len(d) < 4 {
-			break
-		}
-
+	for len(d) >= 4 {
 		x := &tempo{BeatsPerMinute: 0}
 		b := d[0]
 		if b == '\xff' {
@@ -50,7 +46,7 @@ func (z *SYTC) ProcessData(s int, d []byte) IFrame {
 			b = d[0]
 		}
 
-		x.BeatsPerMinute = x.BeatsPerMinute + GetSize([]byte{b}, 8)
+		x.BeatsPerMinute += GetSize([]byte{b}, 8)
 		d = d[1:]
 
 		x.TimeCode = GetSize(d[:3], 8)

@@ -3,7 +3,6 @@ package frames
 import (
 	"bytes"
 	"fmt"
-	"math"
 )
 
 // RVA2 provides relative volume adjustment for the file
@@ -67,7 +66,7 @@ func (r *RVA2) ProcessData(s int, d []byte) IFrame {
 		bits := GetSize([]byte{d[0]}, 8)
 		d = d[1:]
 
-		bytes := int(math.Ceil(float64(bits / 8)))
+		bytes := int(float64(bits / 8))
 		if len(d) >= bytes {
 			c.Volume = GetSize(d[:bytes], 8)
 		}

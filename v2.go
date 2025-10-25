@@ -55,11 +55,11 @@ const (
 
 func getBuffer(f frames.FrameFile) ([]byte, error) {
 	buf := make([]byte, v2HeaderLength)
-	f.Seek(v2HeaderStart, v2HeaderStart)
-	f.Read(buf)
+	_, _ = f.Seek(v2HeaderStart, v2HeaderStart)
+	_, _ = f.Read(buf)
 
 	if string(buf[:v2HeaderOffset]) != v2HeaderInit {
-		return nil, fmt.Errorf("Not a valid ID3 Version 2 tag found")
+		return nil, fmt.Errorf("not a valid ID3 Version 2 tag found")
 	}
 
 	return buf, nil
@@ -130,7 +130,7 @@ func (f *V2) Parse(h frames.FrameFile) error {
 		case frames.Version2:
 			tmpSize, resp = f.prepV2Frame(v2OrigByteLen, bitwiseSeventhShifter, frames.Version22Frames, false)
 		default:
-			return fmt.Errorf("Frame version not supported v2.%d.%d", f.Major, f.Min)
+			return fmt.Errorf("frame version not supported v2.%d.%d", f.Major, f.Min)
 		}
 
 		// lack of frame or invalid frame
@@ -244,7 +244,7 @@ func (f *V2) nextBytes(length int) []byte {
 	}
 
 	t := make([]byte, length)
-	f.file.Read(t)
+	_, _ = f.file.Read(t)
 
 	return t
 }

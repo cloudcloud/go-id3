@@ -70,9 +70,9 @@ func (r *RVAD) ProcessData(s int, d []byte) IFrame {
 
 	// let's not just blindly check all these lengths...
 	defer func() IFrame {
-		if x := recover(); x != nil {
-			// a panic happened!
-		}
+		// eat the panic
+		_ = recover()
+
 		return r
 	}()
 

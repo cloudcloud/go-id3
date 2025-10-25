@@ -15,7 +15,7 @@ type IPLS struct {
 
 // DisplayContent will comprehensively display known information
 func (i *IPLS) DisplayContent() string {
-	out := fmt.Sprintf("Involved People:\n")
+	out := "Involved People:\n"
 	for k, v := range i.People {
 		out = fmt.Sprintf("%s\t%s: %s\n", out, k, v)
 	}
