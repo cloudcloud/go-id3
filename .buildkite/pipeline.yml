@@ -48,7 +48,6 @@ steps:
       - name: ":{{matrix.os}}: build {{matrix.os}} {{matrix.arch}} binary"
         command: "goreleaser build --single-target --snapshot"
         artifact_paths: "dist/**/*"
-        image: goreleaser/goreleaser:v2.12.7
         env:
           - GOOS={{matrix.os}}
           - GOARCH={{matrix.arch}}
