@@ -34,7 +34,7 @@ steps:
           - echo '<details><summary>Coverage tree map</summary><img src="artifact://cover-tree.svg" alt="Test coverage tree map" width="70%"></details>' | buildkite-agent annotate --style "info"
         plugins:
           - docker-compose#v5.10.0:
-              config: .buildkite/docker-compose.yaml
+              config: .buildkite/docker-compose.yml
               run: golangci-lint
               tty: true
               mount-buildkite-agent: true
