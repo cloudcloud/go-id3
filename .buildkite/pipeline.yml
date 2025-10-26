@@ -60,6 +60,7 @@ steps:
         plugins:
           - docker-compose#v5.11.0:
               config: .buildkite/docker-compose.yml
+              entrypoint: ""
               run: goreleaser
               tty: true
               mount-buildkite-agent: true
