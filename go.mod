@@ -4,7 +4,7 @@ go 1.25
 
 require (
 	github.com/stretchr/testify v1.7.0
-	gopkg.in/yaml.v2 v2.0.0-20160301204022-a83829b6f129
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
