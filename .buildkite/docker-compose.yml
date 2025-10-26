@@ -10,3 +10,13 @@ services:
       - GOCACHE=/gocache
       - GOMODCACHE=/gomodcache
 
+  goreleaser:
+    image: goreleaser/goreleaser:v2.12.7
+    working_dir: /app
+    volumes:
+      - ..:/app:cached
+      - ~/gocache:/gocache
+      - ~/gomodcache:/gomodcache
+    environment:
+      - GOCACHE=/gocache
+      - GOMODCACHE=/gomodcache
