@@ -30,7 +30,7 @@ func TestBaseFile(t *testing.T) {
 
 func TestNoFile(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("ID3\x03\x00\x00\x00\x00\x00\x17" +
+	_, _ = b.Write([]byte("ID3\x03\x00\x00\x00\x00\x00\x17" +
 		"TPE2\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
 		"TAGBob is great                  " +
 		"Bob                           " +
@@ -54,7 +54,7 @@ func TestNoFile(t *testing.T) {
 
 func TestNoV2(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("TAGBob is great                  " +
+	_, _ = b.Write([]byte("TAGBob is great                  " +
 		"Bob                           " +
 		"Bobbum                        " +
 		"2016" +
@@ -76,7 +76,7 @@ func TestNoV2(t *testing.T) {
 
 func TestNoV2Json(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("TAGBob is great                  " +
+	_, _ = b.Write([]byte("TAGBob is great                  " +
 		"Bob                           " +
 		"Bobbum                        " +
 		"2016" +
@@ -102,7 +102,7 @@ func TestNoV2Json(t *testing.T) {
 
 func TestNoV2Yaml(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("TAGBob is great                  " +
+	_, _ = b.Write([]byte("TAGBob is great                  " +
 		"Bob                           " +
 		"Bobbum                        " +
 		"2016" +
@@ -171,14 +171,14 @@ func (t *tfile) Read(b []byte) (int, error) {
 
 		if length > v1TagSize {
 			r := bytes.NewReader(t.buf.Bytes())
-			r.ReadAt(b, int64(length-v1TagSize))
+			_, _ = r.ReadAt(b, int64(length-v1TagSize))
 		} else {
-			t.buf.Read(b)
+			_, _ = t.buf.Read(b)
 		}
 
 		t.seekVal = 0
 	} else {
-		t.buf.Read(b)
+		_, _ = t.buf.Read(b)
 	}
 
 	return len(b), nil

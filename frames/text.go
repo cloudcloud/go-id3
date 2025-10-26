@@ -46,9 +46,9 @@ func (t *TEXT) ProcessData(s int, d []byte) IFrame {
 		d = d[1:]
 
 		if !t.Utf16 {
-			t.Frame.Cleaned = GetStr(d)
+			t.Cleaned = GetStr(d)
 		} else {
-			t.Frame.Cleaned = GetUnicodeStr(d)
+			t.Cleaned = GetUnicodeStr(d)
 		}
 	}
 

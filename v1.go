@@ -36,11 +36,11 @@ const (
 // and extracts the tag information.
 func (i *V1) Parse(h frames.FrameFile) error {
 	b := make([]byte, v1TagSize)
-	h.Seek(-int64(v1TagSize), v1TagLocation)
-	h.Read(b)
+	_, _ = h.Seek(-int64(v1TagSize), v1TagLocation)
+	_, _ = h.Read(b)
 
 	if frames.GetStr(b[0:v1TagStart]) != "TAG" {
-		return fmt.Errorf("No id3v1, %#v", b[0:v1TagStart])
+		return fmt.Errorf("no id3v1, %#v", b[0:v1TagStart])
 	}
 	b = b[v1TagStart:]
 

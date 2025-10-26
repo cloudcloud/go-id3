@@ -4,7 +4,7 @@ import "testing"
 
 func TestParseV1(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("TAGBob is great                  " +
+	_, _ = b.Write([]byte("TAGBob is great                  " +
 		"Bob                           " +
 		"Bobbum                        " +
 		"2016" +
@@ -23,7 +23,7 @@ func TestParseV1(t *testing.T) {
 
 func TestParseV1Fail(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("NOPE"))
+	_, _ = b.Write([]byte("NOPE"))
 	v := &V1{Debug: false}
 
 	err := v.Parse(b)

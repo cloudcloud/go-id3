@@ -26,22 +26,17 @@ type Version interface {
 	Parse(frames.FrameFile) error
 }
 
-const (
-	readFromEnd   = 2
-	readFromStart = 0
-)
-
 // Process will begin the opening and loading of File content
 func (f *File) Process(h frames.FrameFile) *File {
 	f.fileHandle = h
 
 	// run through v1
 	f.V1 = &V1{Debug: f.Debug}
-	f.V1.Parse(f.fileHandle)
+	_ = f.V1.Parse(f.fileHandle)
 
 	// run through v2
 	f.V2 = &V2{Debug: f.Debug}
-	f.V2.Parse(f.fileHandle)
+	_ = f.V2.Parse(f.fileHandle)
 
 	return f
 }
@@ -56,7 +51,7 @@ func (f *File) PrettyPrint(o io.Writer, format string) {
 
 	case "yaml":
 		out, _ := yaml.Marshal(f)
-		fmt.Fprintf(o, string(out))
+		fmt.Fprint(o, string(out))
 
 	case "raw":
 
@@ -64,7 +59,7 @@ func (f *File) PrettyPrint(o io.Writer, format string) {
 		fallthrough
 	default:
 		e := json.NewEncoder(o)
-		e.Encode(f)
+		_ = e.Encode(f)
 	}
 }
 

@@ -39,7 +39,7 @@ func (t *tfile) Close() error {
 }
 
 func (t *tfile) Read(b []byte) (int, error) {
-	t.buf.Read(b)
+	_, _ = t.buf.Read(b)
 
 	return len(b), nil
 }

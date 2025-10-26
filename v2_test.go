@@ -11,7 +11,7 @@ import (
 
 func TestBaseV2(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("Bob is "))
+	_, _ = b.Write([]byte("Bob is "))
 	v := &V2{Debug: false}
 
 	err := v.Parse(b)
@@ -22,7 +22,7 @@ func TestBaseV2(t *testing.T) {
 
 func TestParseV2(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("ID3\x03\x00\x40\x00\x00\x00\x2b" +
+	_, _ = b.Write([]byte("ID3\x03\x00\x40\x00\x00\x00\x2b" +
 		"\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00" +
 		"TPE1\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
 		"FAIL\x00\x00\x00\x00\x00\x00"))
@@ -41,7 +41,7 @@ func TestParseV2(t *testing.T) {
 
 func TestParseV2Crc(t *testing.T) {
 	b := &tfile{}
-	b.Write([]byte("ID3\x03\x00\x40\x00\x00\x00\x2b" +
+	_, _ = b.Write([]byte("ID3\x03\x00\x40\x00\x00\x00\x2b" +
 		"\x00\x00\x00\x00\x80\x00\x00\x00\x00\x00" +
 		"\x00\x02\x00\xaa" +
 		"TPE1\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
@@ -66,7 +66,7 @@ func TestParseV2Crc(t *testing.T) {
 func TestParseV2Debug(t *testing.T) {
 	b := &tfile{}
 	v := &V2{Debug: true}
-	b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x35" +
+	_, _ = b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x35" +
 		"TEXT\x00\x00\x00\x0a\x00\x00\x00CerealBoy" +
 		"FAIL\x00\x00\x00\x00\x00\x00" +
 		"TPE2\x00\x00\x00\x0d\x00\x00\x00Cult of Luna"))
@@ -85,11 +85,11 @@ func TestParseV2Debug(t *testing.T) {
 func TestV2Pe3(t *testing.T) {
 	b := &tfile{}
 	v := &V2{Debug: true}
-	b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x46" +
+	_, _ = b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x46" +
 		"TEXT\x00\x00\x00\x0a\x00\x00\x00CerealBoy" +
 		"TPE3\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
 		"TALB\x00\x00\x00\x0b\x00\x00\x00The Beyond"))
-	v.Parse(b)
+	_ = v.Parse(b)
 
 	expected := "Cult of Luna"
 	found := v.GetArtist()
@@ -107,11 +107,11 @@ func TestV2Pe3(t *testing.T) {
 func TestV2Pe4(t *testing.T) {
 	b := &tfile{}
 	v := &V2{Debug: true}
-	b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x46" +
+	_, _ = b.Write([]byte("ID3\x04\x00\x00\x00\x00\x00\x46" +
 		"TEXT\x00\x00\x00\x0a\x00\x00\x00CerealBoy" +
 		"TPE4\x00\x00\x00\x0d\x00\x00\x00Cult of Luna" +
 		"TOAL\x00\x00\x00\x0b\x00\x00\x00The Beyond"))
-	v.Parse(b)
+	_ = v.Parse(b)
 
 	expected := "Cult of Luna"
 	found := v.GetArtist()
@@ -141,7 +141,7 @@ func TestPanicNextBytes(t *testing.T) {
 func TestParseV2Original(t *testing.T) {
 	b := &tfile{}
 	v := &V2{Debug: false}
-	b.Write([]byte("ID3\x02\x00\x00\x00\x00\x00\x14" +
+	_, _ = b.Write([]byte("ID3\x02\x00\x00\x00\x00\x00\x14" +
 		"BUF\x00\x00\x08\x00\x00\x42\x00\x00\x00\x00\x05" +
 		"BUD\x00\x00\x00"))
 	err := v.Parse(b)
@@ -160,9 +160,9 @@ func TestParseV2Original(t *testing.T) {
 func TestParseInvalidVersion(t *testing.T) {
 	b := &tfile{}
 	v := &V2{}
-	b.Write([]byte("ID3\x00\x05\x00\x00\x00\x00\x10" +
+	_, _ = b.Write([]byte("ID3\x00\x05\x00\x00\x00\x00\x10" +
 		"FAIL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"))
-	v.Parse(b)
+	_ = v.Parse(b)
 
 	expected := 0
 	found := len(v.Frames)

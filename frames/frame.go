@@ -83,7 +83,6 @@ func GetStr(b []byte) string {
 		str = string(r)
 	}
 
-	//return strings.TrimSpace(str)
 	return strings.Trim(str, " \t\n\r\x00")
 }
 
@@ -120,10 +119,12 @@ func GetInt(b []byte) int {
 }
 
 // GetBitInt will generate an int from a range of bits in a byte
-func GetBitInt(b byte, ltr bool, l int) int {
+func GetBitInt(b byte, ltr bool, l uint) int {
+	var a uint
+
 	r := 0
 	if !ltr {
-		for a := 0; a < l; a++ {
+		for a = 0; a < l; a++ {
 			r += int(b << uint(a*8))
 		}
 	}
@@ -147,7 +148,7 @@ func GetBoolBit(b byte, i uint) bool {
 func GetSize(b []byte, sig uint) int {
 	s := 0
 	for _, b := range b {
-		s = s << sig
+		s <<= sig
 		s |= int(b)
 	}
 
@@ -156,7 +157,12 @@ func GetSize(b []byte, sig uint) int {
 
 // GetBytePercent will fetch an int from a byte as a percentage
 func GetBytePercent(b []byte, sig uint) int {
-	div := float64(len(b) * 256 / (9 - int(sig)))
+	var length uint
+	if len(b) > 0 {
+		length = uint(len(b))
+	}
+
+	div := float64(length * 256 / (9 - sig))
 	i := float64(GetSize(b, sig))
 	x := math.Ceil((i / div) * 100)
 

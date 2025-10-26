@@ -39,10 +39,10 @@ func TestOwneParseV3(t *testing.T) {
 
 func TestOwneParseUtf16(t *testing.T) {
 	x := NewFrame("OWNE", "", Version4).(*OWNE)
-	b := []byte("\x01aud666.66\x0020160529\xfe\xff B o b")
+	b := []byte("\x01aud666.66\x0020160529\xfe\xffB o b ")
 	x.ProcessData(len(b), b)
 
-	expected := "Ownership\n\tCurrency: aud\n\tPaid: 666.66\n\tDate: 20160529\n\tSeller: ⁂⁯⁢\n"
+	expected := "Ownership\n\tCurrency: aud\n\tPaid: 666.66\n\tDate: 20160529\n\tSeller: 䈠漠戠\n"
 	found := x.DisplayContent()
 	if found != expected {
 		t.Fatalf("Got [%s], Expected [%s]", found, expected)

@@ -1,0 +1,30 @@
+version: 2
+project_name: go-id3
+
+release:
+  name_template: go-id3 v{{.Version}}
+  draft: false
+  prerelease: auto
+  make_latest: "{{not .Prerelease}}"
+  mode: replace
+
+changelog:
+  use: github-native
+
+archives:
+  - formats: [ binary ]
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+    binary: go-id3
+    main: ./cmd/go-id3
+
+checksum:
+  name_template: "go_id3_{{ .Version }}_checksums.txt"
+
+git:
+  ignore_tags:
+    - '{{ envOrDefault "GORELEASER_IGNORE_TAG" ""}}'

@@ -80,7 +80,7 @@ func main() {
 	defer haveErr()
 	if cmd, ok := commands[flag.Arg(0)]; ok {
 		cmd.Run(args[1:], os.Stdout)
-		os.Exit(0)
+		return
 	}
 
 	errorf("unknown command [%q]\nRun 'go-id3 help' for usage.\n", flag.Arg(0))

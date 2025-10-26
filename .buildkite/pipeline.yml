@@ -1,0 +1,71 @@
+#
+#
+#
+agents:
+  queue: "linux-small"
+
+cache:
+  name: golang-cache
+  paths:
+    - "~/gocache"
+    - "~/gomodcache"
+  size: "100g"
+
+steps:
+  - group: ":mag: quality"
+    key: quality
+    steps:
+
+      - name: ":golangci-lint: lint"
+        command: "golangci-lint run --verbose --timeout 3m"
+        plugins:
+          - docker-compose#v5.11.0:
+              config: .buildkite/docker-compose.yml
+              run: golangci-lint
+              tty: true
+              progress: plain
+
+      - name: ":go: test"
+        artifact_paths:
+          - cover-tree.svg
+        command: |
+          go test -coverprofile cover.out ./...
+          go run github.com/nikolaydubina/go-cover-treemap@latest -coverprofile cover.out > cover-tree.svg
+          echo '<details><summary>Coverage tree map</summary><img src="artifact://cover-tree.svg" alt="Test coverage tree map" width="70%"></details>' | buildkite-agent annotate --style "info"
+        plugins:
+          - docker-compose#v5.11.0:
+              config: .buildkite/docker-compose.yml
+              run: golangci-lint
+              tty: true
+              mount-buildkite-agent: true
+              progress: plain
+
+  - group: ":hammer_and_wrench: build"
+    depends_on: quality
+    key: build
+    steps:
+
+      - name: ":{{matrix.os}}: build {{matrix.os}} {{matrix.arch}} binary"
+        command: "goreleaser build --single-target --snapshot"
+        artifact_paths: "dist/**/*"
+        matrix:
+          setup:
+            os:
+              - darwin
+              - linux
+              - windows
+            arch:
+              - amd64
+              - arm64
+        plugins:
+          - docker-compose#v5.11.0:
+              config: .buildkite/docker-compose.yml
+              entrypoint: ""
+              run: goreleaser
+              tty: true
+              mount-buildkite-agent: true
+              progress: plain
+              env:
+                - GOOS={{matrix.os}}
+                - GOARCH={{matrix.arch}}
+
