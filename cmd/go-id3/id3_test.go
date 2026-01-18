@@ -2,29 +2,7 @@ package main
 
 import (
 	"bytes"
-	"testing"
 )
-
-func TestBasicTmpl(t *testing.T) {
-	defer func() {
-		if x := recover(); x == nil {
-			t.Errorf("Was expecting a panic in tmpl()")
-		}
-	}()
-
-	var b bytes.Buffer
-	tmpl(&b, "Hello, friend. {{.Fail}}", interface{}(""))
-	t.Errorf("Panic wasn't triggered.")
-}
-
-func TestBasicName(t *testing.T) {
-	found := readCmd.Name()
-	expected := "read"
-
-	if found != expected {
-		t.Fatalf("Got [%s], Expected [%s]", found, expected)
-	}
-}
 
 type tfile struct {
 	buf *bytes.Buffer

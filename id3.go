@@ -3,9 +3,11 @@
 package id3
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/cloudcloud/go-id3/frames"
 	"gopkg.in/yaml.v2"
@@ -24,6 +26,19 @@ type File struct {
 // Version is an interface for individual version implementations
 type Version interface {
 	Parse(frames.FrameFile) error
+}
+
+func Process(ctx context.Context, input string, debug bool) (*File, error) {
+	f := &File{Filename: input, Debug: debug}
+	handle, err := os.Open(f.Filename)
+	if err != nil {
+		return nil, fmt.Errorf("unable to open the file: %q", f.Filename)
+	}
+	defer handle.Close()
+
+	f.Process(handle)
+
+	return f, nil
 }
 
 // Process will begin the opening and loading of File content
