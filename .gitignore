@@ -19,9 +19,14 @@ _cgo_export.*
 
 _testmain.go
 
+.DS_Store
+
 *.exe
 *.test
 *.prof
 
 coverage*
 dist
+
+.*/*
+go-id3

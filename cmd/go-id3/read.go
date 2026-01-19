@@ -1,43 +1,50 @@
 package main
 
 import (
-	"fmt"
-	"io"
+	"context"
+	"errors"
 	"os"
 
-	file "github.com/cloudcloud/go-id3"
+	"github.com/cloudcloud/go-id3"
+	"github.com/urfave/cli/v3"
 )
 
-var readCmd = &Command{
-	UsageLine: "read [filename]",
-	Short:     "Display information from a specific file",
-	Long: `
+var readCmdDescription = `
 Read comprehensive information about a specific file.
 
 For example:
 	go-id3 read /var/filename.mp3
-`,
-}
+`
 
-func init() {
-	readCmd.Run = readProcess
-}
+var readCmd = &cli.Command{
+	Name:        "read",
+	Usage:       "Display information from a specific file",
+	Description: readCmdDescription,
+	Arguments: []cli.Argument{
+		&cli.StringArg{
+			Name: "filename",
+		},
+	},
+	Flags: []cli.Flag{
+		&cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
+		&cli.StringFlag{Name: "format", Aliases: []string{"f"}},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		input := cmd.StringArg("filename")
+		format := cmd.String("format")
 
-func readProcess(args []string, o io.Writer) {
-	if len(args) < 1 {
-		fmt.Fprintf(o, "No filename provided")
-		return
-	}
+		if input == "" {
+			return errors.New("a filename is required for `read`")
+		}
 
-	defer catcher(os.Stderr)
+		debug := cmd.Bool("debug")
+		output, err := id3.Process(ctx, input, debug)
+		if err != nil {
+			return err
+		}
 
-	f := &file.File{Filename: args[0], Debug: isDebug}
-	handle, err := os.Open(f.Filename)
-	if err != nil {
-		fmt.Fprintf(o, "Unable to open the file [%s]", f.Filename)
-		return
-	}
-	defer handle.Close()
+		output.PrettyPrint(os.Stdout, format)
 
-	f.Process(handle).PrettyPrint(o, outFormat)
+		return nil
+	},
 }
